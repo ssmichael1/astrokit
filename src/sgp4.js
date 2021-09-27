@@ -1,6 +1,12 @@
 /*
- * Translation of SGP4.cpp from Vallado into javascript
- *
+ * Brute-force translation of SGP4.cpp from Vallado into javascript
+ * For software description, see:
+ * http://celestrak.com/publications/AIAA/2008-6770/AIAA-2008-6770.pdf
+ * 
+ * For c++ reference code, see:
+ * https://celestrak.com/software/vallado-sw.php
+ * 
+ * 
  * Translation by: Steven Michael (ssmichael@gmail.com)
  *
  * Note: Vallado writes with excellent clarity in his canonical textbook,
@@ -11,6 +17,7 @@
  * This is a bit brute force, but it seems to work!
  *
  * Sept. 26, 2021
+ * 
  */
 
 

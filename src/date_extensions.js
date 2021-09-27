@@ -1,3 +1,12 @@
+/*
+ * (c) 2021 Steven Michael (ssmichael@gmail.com)
+ *
+ * Extensions to the date class to handle conversion
+ * to Julian dates and modified Julian dates, as well as
+ * handle conversion between different time scales
+ *
+ */
+
 Date.timescale = {
     UTC: 'UTC',
     TT: 'TT',
@@ -7,7 +16,7 @@ Date.timescale = {
 
 // Difference between TAI and UTC
 // See Table 3.1, Explanatory Supplement to the Astronomical Almanac
-let deltaAT = [
+const deltaAT = [
     // 1961-01-01T00:00:00.000Z
     { 'time': -283996800000, 'dt': (x) => { 1.422828 + 0.001296 * (x.mjd() - 37300) } },
     // 1961-08-01T00:00:00.000Z
@@ -46,7 +55,7 @@ let deltaAT = [
     { 'time': 157766400000, 'dt': (x) => 14 },
     // 1976-01-01T00:00:00.000Z
     { 'time': 189302400000, 'dt': (x) => 15 },
-    // 1977-01-01T00:00:00.000Z 
+    // 1977-01-01T00:00:00.000Z
     { 'time': 220924800000, 'dt': (x) => 16 },
     // 1978-01-01T00:00:00.000Z
     { 'time': 252460800000, 'dt': (x) => 17 },
@@ -92,6 +101,7 @@ let deltaAT = [
     { 'time': 1483228800000, 'dt': (x) => 37 }
 ]
 
+// Compute time difference between UTC & TAI at the given time
 let utc2tai = (t) => {
     idx = deltaAT.findIndex((x) => x.time > t.valueOf())
     if (idx > 0)
@@ -99,7 +109,6 @@ let utc2tai = (t) => {
     else
         return 0
 }
-
 
 // Julian date at given time scale (Default is UTC)
 Date.prototype.jd = function (ts) {

@@ -1,8 +1,30 @@
 const { sgp4init, sgp4, getgravconst } = require("./sgp4.js")
 
 // https://en.wikipedia.org/wiki/Two-line_element_set
+
+/**
+ * Class for representing two-line element set (TLE)
+ * The two-line element set represents the ephemerides that
+ * describe satellite positions.  TLEs are a standard
+ * way of representing ephemerides
+ * 
+ * Publicly-available ephemerides for most satellites are 
+ * kept and updated at www.space-track.org
+ * 
+ */
 class TLE {
 
+    /**
+     * 
+     * Construct TLE from lines. This accepts as input the traditional
+     * 2-line TLE, or the 3-line version with the first line identifying
+     * the name of the satellite
+     * 
+     * @constructor
+     * @param {*} lines Array of lines representing the TLE, or 1st line 
+     * @param {*} tline2 If lines passed in 1 at a time, this is the 2nd line
+     * @param {*} tline3 If lines passed in 1 at a time, this 3rd line
+     */
     constructor(lines, tline2, tline3) {
         // Figure out the input format
         if (Array.isArray(lines) == false) {
@@ -72,6 +94,16 @@ class TLE {
 
     }
 
+    /**
+     * 
+     * SGP4 propagator computes position and velocity of satellite at given
+     * time in the TEME coordinate frame given input TLE ephemerides
+     * 
+     * @param {*} thedate Date for which to compute position and velocity
+     * @param {*} whichconst Earth parameter values, 'wgs84' or 'wgs72'.  If ommited, 'wgs84' is default
+     * @returns {dict} Dictionary with 'r' member indicating position in meters in TEME frame and 'v' member indicating velocity in meters / second in TEME frame
+     * 
+     */
     sgp4(thedate, whichconst) {
 
         // Use wgs-84 Earth parameters by default

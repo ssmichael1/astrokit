@@ -1,7 +1,23 @@
-const { Quaternion } = require('./index.js');
+/*
+ * (c) 2021 Steven Michael (ssmichael@gmail.com)
+ *
+ * Implementation of JPL low-precision ephemerides for 
+ * solar system bodies
+ * 
+ * For a reference, see:
+ * https://ssd.jpl.nasa.gov/?planet_pos
+ * 
+ * 
+ */
 
-require('./date_extensions.js')
+if (typeof Quaternion == 'undefined') {
+    const Quaternion = require('./quaternion.js')
+    require('./date_extensions.js')
+}
 
+/**
+ * Bodies for which position can be computed
+ */
 const SolarSystemBodies =
 {
     Mercury: "Mercury",
@@ -15,6 +31,7 @@ const SolarSystemBodies =
     Pluto: "Pluto"
 }
 
+// Universal constants
 const univ =
 {
     AU: 1.495978706910000E11,
@@ -32,6 +49,10 @@ const univ =
     mu_sun: 1.32712440018E20,
 }
 
+/**
+ * ephemerides lookup table, pulled from the
+ * JPL horizons webpage
+ */
 const lpephem = {
     Mercury: [
         0.38709927,
@@ -189,17 +210,25 @@ Array.prototype.norm = function () {
     return Math.sqrt(n)
 }
 
-let sind = function (a) {
+const sind = function (a) {
     const deg2rad = Math.PI / 180.0;
     return Math.sin(a * deg2rad)
 }
 
-let cosd = function (a) {
+const cosd = function (a) {
     const deg2rad = Math.PI / 180.0;
     return Math.cos(a * deg2rad);
 }
 
-// Algorithm 31 from Vallado
+
+/**
+ * 
+ * Compute moon position in Earth-centered frame
+ * Algorithm 31 from Vallado
+ * 
+ * @param {Date} thedate Date for which to compute position
+ * @returns 3-vector representing moon position in GCRS frame, meters
+ */
 function moonPosGCRS(thedate) {
     let T = (thedate.jd() - 2451545.0) / 36525.0
     let lambda_ecliptic = 218.32 + 481267.8813 * T +
@@ -234,7 +263,17 @@ function moonPosGCRS(thedate) {
 
 }
 
-// https://ssd.jpl.nasa.gov/txt/aprx_pos_planets.pdf
+/**
+ * 
+ * Implements JPL low-precision calculations for 
+ * solar system ephemerides in the Heliocentric frame
+ * https://ssd.jpl.nasa.gov/txt/aprx_pos_planets.pdf
+ * 
+ * 
+ * @param {SolarSystemBodes} name Name of body
+ * @param {Date} thedate Date to compute position for
+ * @returns 3-vector representing position (meters) in Heliocentric frame
+ */
 function bodyPosHelio(name, thedate) {
     if (!thedate instanceof Date) {
         throw new Error('2nd input must be Date object')
@@ -294,6 +333,14 @@ function bodyPosHelio(name, thedate) {
 
 }
 
+/**
+ * 
+ * Sun position in the Mean-of-Date frame
+ * 
+ * @param {Date} thedate Date for which position is computed
+ * @returns Sun position in Earth-centered MOD frame, meters
+ * 
+ */
 function SunPosMOD(thedate) {
     let T = (thedate.getJulian() - 2451545.0) / 36525.0
     const deg2rad = Math.PI / 180.
@@ -322,109 +369,14 @@ function SunPosMOD(thedate) {
 
 }
 
-// Greenwich mean sidereal time, in radians
-// Input: Julian date in UT1 time base
-function gmst(jd_ut1) {
-    let tut1 = (jd_ut1 - 2451545.0) / 36525.0
-
-    // Expression below gives gmst in seconds
-    let gmst = 67310.54841
-        + tut1 * ((876600.0 * 3600.0 + 8640184.812866))
-        + (tut1 * (0.093104 - tut1 * 6.2E-6));
-    // Convert seconds to radians
-    gmst = (gmst % 86400.0) / 240.0 * Math.PI / 180.0;
-    return gmst;
-}
-
-// Greenwich apparant sidereal time, in radians
-// Input: Julian date in UT1 time base
-function gast(jd_ut1) {
-    // Compute equation of equinoxes
-    let t = jd_ut1 - 2451545.0
-    const deg2rad = Math.PI / 180.
-    let omega = deg2rad * (125.04 - 0.052954 * t);
-    let L = (280.47 + 0.98565 * t) * deg2rad
-    let epsilon = (23.4393 - 0.0000004 * t) * deg2rad
-    let dPsi =
-        (-0.000319 * Math.sin(omega) - 0.000024 * Math.sin(2 * L)) * 15 * deg2rad
-
-    // Greenwich apparant sideral time
-    let gast = gmst(jd_ut1) + dPsi * Math.cos(epsilon);
-    return gast;
-}
-
-// Quaternion that can be used
-// To rotate from TEME frame to the ITRF frame
-// TEME is the frame output by the SGP-4 orbit propagator
-// ITRF is the International Terrestial Reference Frame, 
-// and is a Cartesian Earth-Fixed frame from which geodetic coordinates
-// (latitude, longitude) can be computed
-const qTEME2ITRF = (thedate) => {
-    return Quaternion.rotz(gmst(thedate.jd(Date.timescale.UTC)))
-}
-
-const qGCRS2ITRF = (thedate) => {
-    let t = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
-
-    // Compute precession rotation
-    let zeta = 2.650545
-        + t * (2306.083227
-            + t * (0.2988499
-                + t * (0.01801828
-                    + t * (-0.000005971
-                        + t * -0.0000003173))));
-
-
-    let z = -2.650545
-        + t * (2306.077181
-            + t * (1.0927348
-                + t * (0.01826837
-                    + t * (-0.000028596
-                        + t * -0.0000002904))));
-
-    let theta = t * (2004.191903
-        + t * (-0.4294934
-            + t * (-0.04182264
-                + t * (-0.000007089
-                    + t * -0.0000001274))));
-
-    const ARCSEC2RAD = Math.PI / 180.0 / 3600.0
-    zeta = zeta * ARCSEC2RAD;
-    z = z * ARCSEC2RAD;
-    theta = theta * ARCSEC2RAD;
-    let qP = Quaternion.mult(Quaternion.rotz(zeta),
-        Quaternion.mult(Quaternion.roty(-theta),
-            Quaternion.rotz(z)))
-
-    const DEG2RAD = Math.PI / 180.
-    let deltaPsi =
-        DEG2RAD * (-0.0048 * Math.sin((125.0 - 0.05295 * t) * DEG2RAD) -
-            0.0004 * Math.sin((200.9 + 1.97129 * t) * DEG2RAD));
-    let deltaEpsilon =
-        DEG2RAD * (0.0026 * Math.cos((125.0 - 0.05295 * t) * DEG2RAD) +
-            0.0002 * Math.cos((200.9 + 1.97129 * t) * DEG2RAD));
-    let epsilonA =
-        DEG2RAD *
-        ((23.0 + 26.0 / 60.0 + 21.406 / 3600.0)
-            + t * (-46.836769 / 3600.0
-                + t * (-0.0001831 / 3600.0
-                    + t * (0.00200340 / 3600.0
-                        + t * (-5.76e-7 / 3600.0
-                            + t * -4.34E-8 / 3600.0)))));
-    let epsilon = epsilonA + deltaEpsilon;
-    let qN = Quaternion.mult(Quaternion.rotx(-epsilonA),
-        Quaternion.mult(Quaternion.rotz(deltaPsi),
-            Quaternion.rotx(epsilon)))
-
-    // gast should take as input jd in UT1 time base, but UTC
-    // is close enough for our purposes
-    let qGast = Quaternion.rotz(-gast(thedate.jd(Date.timescale.UTC)))
-
-    let q = Quaternion.mult(qP, Quaternion.mult(qN, qGast))
-    return q.conj()
-}
-
-// Sun position in the Earth-centered GCRS frame
+/**
+ * 
+ * Compute sun position in Earth-centered GCRS frame
+ * using low-precision ephemerides provided by JPL
+ * 
+ * @param {Date} thedate Date for which to compute position
+ * @returns 3-vector representing sun position in Earth-centered GCRS frame
+ */
 const sunPosGCRS = (thedate) => {
     return bodyPosHelio(SolarSystemBodies.EarthMoon, thedate)
         .map(x => -1 * x)
@@ -432,8 +384,15 @@ const sunPosGCRS = (thedate) => {
 
 }
 
-// Solar system body position in the 
-// Earth-centered GCRS frame
+/**
+ * 
+ * Compute solar system body position in Earth-centered GCRS frame
+ * using low-precision ephemerides provided by JPL
+ * 
+ * @param {SolarSystemBodies} body Body for which to compute position
+ * @param {Date} thedate Time for which position is computed
+ * @returns Solar system body position in Earth-centered frame
+ */
 const bodyPosGCRS = (body, thedate) => {
     return bodyPosHelio(body, thedate).eadd(
         bodyPosHelio(SolarSystemBodies.EarthMoon, thedate)
@@ -447,8 +406,6 @@ if (typeof exports === 'object' && typeof module !== 'undefined') {
     module.exports = {
         sunPosGCRS,
         moonPosGCRS,
-        qGCRS2ITRF,
-        qTEME2ITRF,
         bodyPosHelio,
         bodyPosGCRS,
         univ
