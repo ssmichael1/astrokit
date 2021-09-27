@@ -1,0 +1,14 @@
+{
+  "name": "astrokit",
+  "version": "0.1.0",
+  "description": "Toolkit for solar system ephemerides and satellite propagation via SGP4",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Steven Michael (ssmichael@gmail.com)",
+  "license": "ISC"
+}
