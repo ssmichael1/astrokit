@@ -2,19 +2,40 @@
   "name": "astrokit",
   "version": "0.1.0",
   "description": "Toolkit for solar system ephemerides and satellite propagation via SGP4",
+  "keywords": [
+    "solar",
+    "satellite",
+    "sgp4",
+    "ephemerides",
+    "JPL",
+    "vallado",
+    "astronomy",
+    "solar system",
+    "solarsystem",
+    "moon"
+  ],
+  "author": {
+    "name": "Steven Michael (ssmichael@gmail.com)",
+    "url": "https://github.com/StevenSamirMichael/"
+  },
+  "license": "ISC",
+  "homepage": "https://github.com/StevenSamirMichael/astrokit",
   "main": "src/index.js",
-	"type": "module",
+  "type": "module",
   "directories": {
-    "test": "test"
+    "test": "test",
+    "examples": "examples"
   },
   "scripts": {
-    "test": "tape 'test/**/*-test.js' && eslint src"
+    "test": "tape 'test/**/*-test.js' && eslint src",
+    "build": "rm -rf dist && mkdir dist && rollup --banner \"$(preamble)\" -f umd -n ak -o dist/astrokit.js -- src/index.js",
+    "build:min": "npm run build && uglifyjs  dist/astrokit.js -c -m -o dist/astrokit.min.js"
   },
-  "author": "Steven Michael (ssmichael@gmail.com)",
-  "license": "ISC",
   "devDependencies": {
+    "eslint": "^7.32.0",
+    "package-preamble": "^0.1.0",
     "rollup": "^2.57.0",
     "tape": "^5.3.1",
-    "eslint": "^7.32.0"
+    "uglify-js": "^3.14.2"
   }
 }

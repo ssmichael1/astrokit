@@ -23,7 +23,7 @@ The code in this document draws heavily on the following canonical texts:
 
 ## **Validation**
 
-The <tt>tests</tt> directory includes tests of included alogirhtms.  These include:
+The <tt>tests</tt> directory includes tests of included algorhithms.  These include:
 
 * Code for importing test TLEs from "official" Vallado distribution of C++ sgp4 implementation, and comparing computed positions and velocities against "official" test vectors 
 * Implementation of various examples from the above reference literature for solar system ephemerides & time conversion
@@ -31,12 +31,14 @@ The <tt>tests</tt> directory includes tests of included alogirhtms.  These inclu
 
 The <tt>tape</tt> module, https://www.npmjs.com/package/tape, is used for test management.
 
-## **Example** 
+## **Examples** 
 
-Examples are included in the <tt>examples</tt> directory:
+Examples are included in the <tt>examples</tt> directory and can be run via [Node.js](http://nodejs.org/)
 * **<tt>iss_groundtrack.js</tt>**: Given input TLE for the international space station (ISS), compute the ground track (longitude and latitude) over a single orbit
 
 * **<tt>satelellite_comm_access.js</tt>**: Given input TLE for the TROPICS Pathfinder satellite (sun synchronous orbit), compute contact times over an orbit for the communications ground station in Svalbard, Norway
+
+* **<tt>solarpanels.js</tt>**: Use sun position and rotation to Earth-fixed frame to compute maximum expected power generation of solar panel system (in this case, the one on the roof of my house)
 
 For reference the code for <tt>iss_groundtrack.js</tt> is below.
 
@@ -95,4 +97,66 @@ let iss_groundtrack = times.map((t) => {
 })
 // print output to screen
 console.log(iss_groundtrack)
+```
+
+## **Usage**
+
+### **Install and Build**
+
+The javascript is written natively in ES6, and must be converted for use in html.  This can be done via the following:
+* Install [Node.js](https://nodejs.org/) and Node package manager
+* Install package dependencies. From top-level directory of repo, run:
+    ```
+    npm run install
+    ```
+* If desired, run test scripts
+    ```
+    npm run test
+    ```
+* Build javascript for insertion into web pages. This will create files <tt>dist/astrokit.js</tt> and <tt>dist/astrokit.min.js</tt>
+
+    ```
+    npm run build
+    npm run build:min
+    ```
+
+### **Including in HTML**
+Example usage is below.  This is a javascript module, with exported name <tt>ak</tt> in the global scope created by using <tt>astrokit/dist/astrokit.min.js</tt>
+
+```html
+<head>
+        <script type="module" src="astrokit/dist/astrokit.min.js"></script>
+</head>
+<body>
+    <script>
+        // Lines for a TLE
+        // International Space Station, downloaded from www.space-track.org, 9/24/21
+        const tle_lines = [
+        '0 ISS(ZARYA)',
+        '1 25544U 98067A   21267.21567994  .00001839  00000-0  42318-4 0  9994',
+        '2 25544  51.6435 213.0833 0003460  47.4035  50.6925 15.48430119303944',
+        ]
+        
+        // Create a TLE object using the above lines
+        let tle = ak.TLE(tle_lines)
+
+        // Find satellite position at given time
+        // Midnight UTC on Sept 25, 2021
+        let thetime = Date(Date.UTC(2021, 8, 25))
+        // Run SGP4 propagator
+        results = ak.sgp4(tle, thetime)
+
+        // Position, in meters, in teme frame is in results.r
+        // Velocity, in meters / second, in TEME frame is in results.v
+        
+        // Rotate position to ITRF frame
+        // and wrap an ITRF coordinate class around it.
+        let ITRF = ak.ITRFCoord(ak.qTEME2ITRF(thetime).rotate(results.r))
+
+        // get latitude and longitude
+        let latitude = ITRF.latitude_deg()
+        let longitude = ITRF.longitude_deg()
+        let height = ITRF.height()
+    </script>
+</body>
 ```

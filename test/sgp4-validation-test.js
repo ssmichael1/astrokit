@@ -1,3 +1,12 @@
+/*
+ * (c) 2021 Steven Michael (ssmichael@gmail.com)
+ *
+ * Run native javascript SGP4 propagator, comparing 
+ * TLE propagation results against test vectors provided
+ * by Vallado in CPP "official" distribution of SGP4
+ *
+ */
+
 // Include the "astrokit"
 import * as ak from '../src/index.js'
 
@@ -5,10 +14,11 @@ import { readFileSync } from 'fs'
 import tape from 'tape'
 
 // Load TLEs from file
+// This code is very specific to the funky file type
+// distributed by Vallado
 const load_tles = () => {
     let rawlines = readFileSync('test/sgp4_testvecs/SGP4-VER.tle')
         .toString().split("\n");
-
     // Read in the tles
     let tles = []
     let line1 = ''
