@@ -86,13 +86,13 @@ const twopi = Math.PI * 2
 const deg2rad = Math.PI / 180.0
 const fmod = (a, b) => (a % b)
 //const fmod = function (a, b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(12)); };
-const help = 'n'
+//const help = 'n'
 const cos = Math.cos
 const sin = Math.sin
-const tan = Math.tan
+//const tan = Math.tan
 const atan2 = Math.atan2
 const sqrt = Math.sqrt
-const pow = (a, b) => (a ** b)
+const pow = (a, b) => Math.pow(a, b)
 const floor = Math.floor
 const fabs = Math.abs
 
@@ -175,7 +175,7 @@ const gstime_SGP4 = (jdut1) => {
 
 
 
-const getgravconst = (whichconst, satrec) => {
+export const getgravconst = (whichconst, satrec) => {
 
 	switch (whichconst) {
 		// -- wgs-72 low precision str#3 constants --
@@ -322,6 +322,12 @@ const dpper = (e3, ee2, peo, pgho, pho,
 		sinip, sinop, sinzf, sis, sll, sls, xls,
 		xnoh, zf, zm, zel, zes, znl, zns;
 	*/
+	let alfdp = 0, betdp = 0, cosip = 0, cosop = 0, dalf = 0, dbet = 0
+	let dls = 0, f2 = 0, f3 = 0, pe = 0, pgh = 0, ph = 0, pinc = 0, pl = 0
+	let sel = 0, ses = 0, sghl = 0, sghs = 0, shll = 0, shs = 0, sil = 0
+	let sinip = 0, sinop = 0, sinzf = 0, sis = 0, sll = 0, sls = 0, xls = 0
+	let xnoh = 0, zf = 0, zm = 0, zel = 0, zes = 0, znl = 0, zns = 0
+
 
 	/* ---------------------- constants ----------------------------- */
 	zns = 1.19459e-5;
@@ -526,7 +532,7 @@ const dscom = (epoch, ep, argpp, tc, inclp,
 	sz2, sz3, sz11, sz12, sz13, sz21, sz22, sz23, sz31, sz32,
 	sz33, xgh2, xgh3, xgh4, xh2, xh3, xi2, xi3, xl2, xl3,
 	xl4, nm, z1, z2, z3, z11, z12, z13, z21, z22,
-	z23, z31, z32, z33, zmol) => {
+	z23, z31, z32, z33, zmol, zmos) => {
 	/* -------------------------- constants ------------------------- */
 	/* c++ comment out 
 	const double zes = 0.01675;
@@ -552,15 +558,24 @@ const dscom = (epoch, ep, argpp, tc, inclp,
 	zcosi, zcosil, zsing, zsingl, zsinh, zsinhl, zsini,
 	zsinil, zx, zy;
 	*/
+	let lsflg = 0, a1 = 0, a2 = 0, a3 = 0, a4 = 0
+	let a5 = 0, a6 = 0, a7 = 0
+	let a8 = 0, a9 = 0, a10 = 0, betasq = 0, cc = 0
+	let ctem = 0, stem = 0, x1 = 0, x2 = 0, x3 = 0
+	let x4 = 0, x5 = 0, x6 = 0, x7 = 0, x8 = 0
+	let xnodce = 0, xnoi = 0, zcosg = 0, zcosgl = 0, zcosh = 0
+	let zcoshl = 0, zcosi = 0, zcosil = 0, zsing = 0, zsingl = 0
+	let zsinh = 0, zsinhl = 0, zsini = 0
+	let zsinil = 0, zx = 0, zy = 0
 
-	zes = 0.01675;
-	zel = 0.05490;
-	c1ss = 2.9864797e-6;
-	c1l = 4.7968065e-7;
-	zsinis = 0.39785416;
-	zcosis = 0.91744867;
-	zcosgs = 0.1945905;
-	zsings = -0.98088458;
+	let zes = 0.01675;
+	let zel = 0.05490;
+	let c1ss = 2.9864797e-6;
+	let c1l = 4.7968065e-7;
+	let zsinis = 0.39785416;
+	let zcosis = 0.91744867;
+	let zcosgs = 0.1945905;
+	let zsings = -0.98088458;
 	//twopi = 2.0 * pi;
 
 	nm = np;
@@ -864,8 +879,15 @@ const dsinit = (xke,
 		root52, x2o3, znl, emo, zns, emsqo;
 	*/
 	/* javascript addition */
-	aonv = 0
-
+	let aonv = 0, ainv2 = 0, cosisq = 0, eoc = 0, f220 = 0, f221 = 0, f311 = 0
+	let f321 = 0, f322 = 0, f330 = 0, f441 = 0, f442 = 0, f522 = 0, f523 = 0
+	let f542 = 0, f543 = 0, g200 = 0, g201 = 0, g211 = 0, g300 = 0, g310 = 0
+	let g322 = 0, g410 = 0, g422 = 0, g520 = 0, g521 = 0, g532 = 0, g533 = 0
+	let ses = 0, sgs = 0, sghl = 0, sghs = 0, shs = 0, shll = 0, sis = 0
+	let sini2 = 0, sls = 0, temp = 0, temp1 = 0, theta = 0, xno2 = 0, q22 = 0
+	let q31 = 0, q33 = 0, root22 = 0, root44 = 0, root54 = 0, rptim = 0
+	let root32 = 0, root52 = 0, x2o3 = 0, znl = 0, emo = 0, zns = 0, emsqo = 0
+	/* ------------------------- */
 
 	q22 = 1.7891679e-6;
 	q31 = 2.1460748e-6;
@@ -1160,6 +1182,11 @@ const dspace = (irez, d2201, d2211, d3210, d3222, d4410,
 		double delt, ft, theta, x2li, x2omi, xl, xldot, xnddt, xndt, xomi, g22, g32,
 		g44, g52, g54, fasx2, fasx4, fasx6, rptim, step2, stepn, stepp;
 	*/
+	let iretn = 0, delt = 0, ft = 0, theta = 0, x2li = 0
+	let x2omi = 0, xl = 0, xldot = 0, xnddt = 0, xndt = 0
+	let xomi = 0, g22 = 0, g32 = 0, g44 = 0, g52 = 0, g54 = 0, fasx2 = 0
+	let fasx4 = 0, fasx6 = 0, rptim = 0, step2 = 0, stepn = 0, stepp = 0
+
 
 	fasx2 = 0.13130908;
 	fasx4 = 2.8843198;
@@ -1215,7 +1242,7 @@ const dspace = (irez, d2201, d2211, d3210, d3222, d4410,
 			delt = stepn;
 
 		iretn = 381; // added for do loop
-		iret = 0; // added for loop
+		// iret = 0; // added for loop
 		while (iretn == 381) {
 			/* ------------------- dot terms calculated ------------- */
 			/* ----------- near - synchronous resonance terms ------- */
@@ -1251,7 +1278,7 @@ const dspace = (irez, d2201, d2211, d3210, d3222, d4410,
 			/* ----------------------- integrator ------------------- */
 			// sgp4fix move end checks to end of routine
 			if (fabs(t - atime) >= stepp) {
-				iret = 0;
+				//iret = 0;
 				iretn = 381;
 			}
 			else // exit here
@@ -1370,12 +1397,15 @@ const initl = (xke, j2,
 		double ts70, tfrac, c1, thgr70, fk5r, c1p2p;
 	const double twopi = 2.0 * pi;
 	*/
+	let ak = 0, d1 = 0, del = 0, adel = 0, po = 0
+	let ds70 = 0, ts70 = 0, tfrac = 0, c1 = 0
+	let thgr70 = 0, fk5r = 0, c1p2p = 0
 
 	/* ----------------------- earth constants ---------------------- */
 	// sgp4fix identify constants and allow alternate values
 	// only xke and j2 are used here so pass them in directly
 	// getgravconst( whichconst, tumin, mu, radiusearthkm, xke, j2, j3, j4, j3oj2 );
-	x2o3 = 2.0 / 3.0;
+	const x2o3 = 2.0 / 3.0;
 
 	/* ------------- calculate auxillary epoch quantities ---------- */
 	eccsq = ecco * ecco;
@@ -1416,7 +1446,7 @@ const initl = (xke, j2,
 	thgr70 = 1.7321343856509374;
 	fk5r = 5.07551419432269442e-15;
 	c1p2p = c1 + twopi;
-	gsto1 = fmod(thgr70 + c1 * ds70 + c1p2p * tfrac + ts70 * ts70 * fk5r, twopi);
+	let gsto1 = fmod(thgr70 + c1 * ds70 + c1p2p * tfrac + ts70 * ts70 * fk5r, twopi);
 	if (gsto1 < 0.0)
 		gsto1 = gsto1 + twopi;
 	//    }
@@ -1526,7 +1556,7 @@ const initl = (xke, j2,
 		double r[3], double v[3]	
 	)
 */
-const sgp4 = (satrec, tsince) => {
+export const sgp4 = (satrec, tsince) => {
 
 	let r = [0, 0, 0]
 	let v = [0, 0, 0]
@@ -1546,6 +1576,21 @@ const sgp4 = (satrec, tsince) => {
 		twopi, x2o3, vkmpersec, delmtemp;
 		int ktr;
 	*/
+	let am = 0, axnl = 0, aynl = 0, betal = 0, cosim = 0, cnod = 0
+	let cos2u = 0, coseo1 = 0, cosi = 0, cosip = 0, cosisq = 0
+	let cossu = 0, cosu = 0, delm = 0, delomg = 0, em = 0, emsq = 0, ecose = 0
+	let el2 = 0, eo1 = 0, ep = 0, esine = 0, argpm = 0, argpp = 0, argpdf = 0
+	let pl = 0, mrt = 0, mvt = 0, rdotl = 0, rl = 0, rvdot = 0, rvdotl = 0
+	let sinim = 0, sin2u = 0, sineo1 = 0, sini = 0, sinip = 0
+	let sinsu = 0, sinu = 0, snod = 0, su = 0, t2 = 0, t3 = 0, t4 = 0
+	let tem5 = 0, temp = 0, temp1 = 0, temp2 = 0, tempa = 0
+	let tempe = 0, templ = 0, u = 0, ux = 0
+	let uy = 0, uz = 0, vx = 0, vy = 0, vz = 0, inclm = 0, mm = 0
+	let nm = 0, nodem = 0, xinc = 0, xincp = 0, xl = 0
+	let xlm = 0, mp = 0, xmdf = 0, xmx = 0, xmy = 0
+	let nodedf = 0, xnode = 0, nodep = 0, tc = 0// , dndt = 0
+	let vkmpersec = 0, delmtemp = 0, ktr = 0
+
 
 	/* ------------------ set mathematical constants --------------- */
 	// sgp4fix divisor for divide by zero check on inclination
@@ -1553,7 +1598,7 @@ const sgp4 = (satrec, tsince) => {
 	// 1.5 e-12, so the threshold was changed to 1.5e-12 for consistency
 	const temp4 = 1.5e-12;
 	//twopi = 2.0 * pi;
-	x2o3 = 2.0 / 3.0;
+	const x2o3 = 2.0 / 3.0;
 	// sgp4fix identify constants and allow alternate values
 	// getgravconst( whichconst, tumin, mu, radiusearthkm, xke, j2, j3, j4, j3oj2 );
 	vkmpersec = satrec.radiusearthkm * satrec.xke / 60.0;
@@ -1603,21 +1648,20 @@ const sgp4 = (satrec, tsince) => {
 		/* js addition*/
 		let dndt = 0
 		/*----------*/
-		let dsr = dspace
-			(
-				satrec.irez,
-				satrec.d2201, satrec.d2211, satrec.d3210,
-				satrec.d3222, satrec.d4410, satrec.d4422,
-				satrec.d5220, satrec.d5232, satrec.d5421,
-				satrec.d5433, satrec.dedt, satrec.del1,
-				satrec.del2, satrec.del3, satrec.didt,
-				satrec.dmdt, satrec.dnodt, satrec.domdt,
-				satrec.argpo, satrec.argpdot, satrec.t, tc,
-				satrec.gsto, satrec.xfact, satrec.xlamo,
-				satrec.no_unkozai, satrec.atime,
-				em, argpm, inclm, satrec.xli, mm, satrec.xni,
-				nodem, dndt, nm
-			);
+		let dsr = dspace(
+			satrec.irez,
+			satrec.d2201, satrec.d2211, satrec.d3210,
+			satrec.d3222, satrec.d4410, satrec.d4422,
+			satrec.d5220, satrec.d5232, satrec.d5421,
+			satrec.d5433, satrec.dedt, satrec.del1,
+			satrec.del2, satrec.del3, satrec.didt,
+			satrec.dmdt, satrec.dnodt, satrec.domdt,
+			satrec.argpo, satrec.argpdot, satrec.t, tc,
+			satrec.gsto, satrec.xfact, satrec.xlamo,
+			satrec.no_unkozai, satrec.atime,
+			em, argpm, inclm, satrec.xli, mm, satrec.xni,
+			nodem, dndt, nm
+		)
 		satrec.atime = dsr.atime
 		em = dsr.em
 		argpm = dsr.argpm
@@ -1670,6 +1714,7 @@ const sgp4 = (satrec, tsince) => {
 	satrec.mm = mm;
 	satrec.nm = nm;
 
+
 	/* ----------------- compute extra mean quantities ------------- */
 	sinim = sin(inclm);
 	cosim = cos(inclm);
@@ -1683,21 +1728,20 @@ const sgp4 = (satrec, tsince) => {
 	sinip = sinim;
 	cosip = cosim;
 	if (satrec.method == 'd') {
-		let dpr = dpper
-			(
-				satrec.e3, satrec.ee2, satrec.peo,
-				satrec.pgho, satrec.pho, satrec.pinco,
-				satrec.plo, satrec.se2, satrec.se3,
-				satrec.sgh2, satrec.sgh3, satrec.sgh4,
-				satrec.sh2, satrec.sh3, satrec.si2,
-				satrec.si3, satrec.sl2, satrec.sl3,
-				satrec.sl4, satrec.t, satrec.xgh2,
-				satrec.xgh3, satrec.xgh4, satrec.xh2,
-				satrec.xh3, satrec.xi2, satrec.xi3,
-				satrec.xl2, satrec.xl3, satrec.xl4,
-				satrec.zmol, satrec.zmos, satrec.inclo,
-				'n', ep, xincp, nodep, argpp, mp, satrec.operationmode
-			);
+		let dpr = dpper(
+			satrec.e3, satrec.ee2, satrec.peo,
+			satrec.pgho, satrec.pho, satrec.pinco,
+			satrec.plo, satrec.se2, satrec.se3,
+			satrec.sgh2, satrec.sgh3, satrec.sgh4,
+			satrec.sh2, satrec.sh3, satrec.si2,
+			satrec.si3, satrec.sl2, satrec.sl3,
+			satrec.sl4, satrec.t, satrec.xgh2,
+			satrec.xgh3, satrec.xgh4, satrec.xh2,
+			satrec.xh3, satrec.xi2, satrec.xi3,
+			satrec.xl2, satrec.xl3, satrec.xl4,
+			satrec.zmol, satrec.zmos, satrec.inclo,
+			'n', ep, xincp, nodep, argpp, mp, satrec.operationmode
+		);
 		ep = dpr.ep
 		xincp = dpr.inclp
 		nodep = dpr.nodep
@@ -1924,7 +1968,7 @@ const double xinclo, const double xmo, const double xno_kozai,
 const double xnodeo, elsetrec& satrec
 		)
 		*/
-const sgp4init = (whichconst, opsmode, satn, epoch,
+export const sgp4init = (whichconst, opsmode, satn, epoch,
 	xbstar, xndot, xnddot, xecco, xargpo,
 	xinclo, xmo, xno_kozai,
 	xnodeo, satrec) => {
@@ -1946,7 +1990,26 @@ const sgp4init = (whichconst, opsmode, satn, epoch,
 	qzms2t, ss, x2o3, r[3], v[3],
 	delmotemp, qzms2ttemp, qzms24temp;
 	*/
-	/* js additions*/
+	let ao = 0, ainv = 0, con42 = 0, cosio = 0, sinio = 0, cosio2 = 0
+	let eccsq = 0, omeosq = 0, posq = 0, rp = 0, rteosq = 0
+	let cnodm = 0, snodm = 0, cosim = 0, sinim = 0, cosomm = 0, sinomm = 0
+	let cc1sq = 0, cc2 = 0, cc3 = 0, coef = 0, coef1 = 0, cosio4 = 0
+	let day = 0, em = 0, emsq = 0, eeta = 0, etasq = 0, gam = 0
+	let argpm = 0, nodem = 0, inclm = 0, mm = 0, nm = 0, perige = 0
+	let pinvsq = 0, psisq = 0, qzms24 = 0
+	let rtemsq = 0, s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0, s6 = 0
+	let s7 = 0, sfour = 0, ss1 = 0, ss2 = 0, ss3 = 0, ss4 = 0, ss5 = 0
+	let ss6 = 0, ss7 = 0, sz1 = 0, sz2 = 0, sz3 = 0
+	let sz11 = 0, sz12 = 0, sz13 = 0, sz21 = 0, sz22 = 0
+	let sz23 = 0, sz31 = 0, sz32 = 0, sz33 = 0
+	let tc = 0, temp = 0, temp1 = 0, temp2 = 0, temp3 = 0, tsi = 0
+	let xpidot = 0, xhdot1 = 0, z1 = 0, z2 = 0, z3 = 0, z11 = 0, z12 = 0
+	let z13 = 0, z21 = 0, z22 = 0, z23 = 0, z31 = 0, z32 = 0, z33 = 0
+	let qzms2t = 0, ss = 0, x2o3 = 0
+	let delmotemp = 0, qzms2ttemp = 0, qzms24temp = 0
+
+
+	/* js additions
 	let ainv = 0
 	let ao = 0
 	let con42 = 0
@@ -2054,10 +2117,10 @@ const sgp4init = (whichconst, opsmode, satn, epoch,
 	satrec.t = 0.0;
 
 	// sgp4fix remove satn as it is not needed in initl
-	let ir = initl
-		(satrec.xke, satrec.j2, satrec.ecco, epoch, satrec.inclo, satrec.no_kozai, satrec.operationmode,
+	let ir =
+		initl(satrec.xke, satrec.j2, satrec.ecco, epoch, satrec.inclo, satrec.no_kozai, satrec.operationmode,
 			satrec.method, ainv, ao, satrec.con41, con42, cosio, cosio2, eccsq, omeosq,
-			posq, rp, rteosq, sinio, satrec.gsto, satrec.no_unkozai);
+			posq, rp, rteosq, sinio, satrec.gsto, satrec.no_unkozai)
 	satrec.method = ir.method
 	ainv = ir.ainv
 	ao = ir.ao
@@ -2170,6 +2233,7 @@ const sgp4init = (whichconst, opsmode, satn, epoch,
 			tc = 0.0;
 			inclm = satrec.inclo;
 
+			/*
 			let snodm = 0
 			let cnodm = 0
 			let sinim = 0
@@ -2189,24 +2253,24 @@ const sgp4init = (whichconst, opsmode, satn, epoch,
 			let nm = 0, z1 = 0, z2 = 0, z3 = 0
 			let z11 = 0, z12 = 0, z13 = 0, z21 = 0, z22 = 0, z23 = 0
 			let z31 = 0, z32 = 0, z33 = 0
-			let is = dscom
-				(
-					epoch, satrec.ecco, satrec.argpo, tc, satrec.inclo, satrec.nodeo,
-					satrec.no_unkozai, snodm, cnodm, sinim, cosim, sinomm, cosomm,
-					day, satrec.e3, satrec.ee2, em, emsq, gam,
-					satrec.peo, satrec.pgho, satrec.pho, satrec.pinco,
-					satrec.plo, rtemsq, satrec.se2, satrec.se3,
-					satrec.sgh2, satrec.sgh3, satrec.sgh4,
-					satrec.sh2, satrec.sh3, satrec.si2, satrec.si3,
-					satrec.sl2, satrec.sl3, satrec.sl4, s1, s2, s3, s4, s5,
-					s6, s7, ss1, ss2, ss3, ss4, ss5, ss6, ss7, sz1, sz2, sz3,
-					sz11, sz12, sz13, sz21, sz22, sz23, sz31, sz32, sz33,
-					satrec.xgh2, satrec.xgh3, satrec.xgh4, satrec.xh2,
-					satrec.xh3, satrec.xi2, satrec.xi3, satrec.xl2,
-					satrec.xl3, satrec.xl4, nm, z1, z2, z3, z11,
-					z12, z13, z21, z22, z23, z31, z32, z33,
-					satrec.zmol, satrec.zmos
-				);
+			*/
+			let is = dscom(
+				epoch, satrec.ecco, satrec.argpo, tc, satrec.inclo, satrec.nodeo,
+				satrec.no_unkozai, snodm, cnodm, sinim, cosim, sinomm, cosomm,
+				day, satrec.e3, satrec.ee2, em, emsq, gam,
+				satrec.peo, satrec.pgho, satrec.pho, satrec.pinco,
+				satrec.plo, rtemsq, satrec.se2, satrec.se3,
+				satrec.sgh2, satrec.sgh3, satrec.sgh4,
+				satrec.sh2, satrec.sh3, satrec.si2, satrec.si3,
+				satrec.sl2, satrec.sl3, satrec.sl4, s1, s2, s3, s4, s5,
+				s6, s7, ss1, ss2, ss3, ss4, ss5, ss6, ss7, sz1, sz2, sz3,
+				sz11, sz12, sz13, sz21, sz22, sz23, sz31, sz32, sz33,
+				satrec.xgh2, satrec.xgh3, satrec.xgh4, satrec.xh2,
+				satrec.xh3, satrec.xi2, satrec.xi3, satrec.xl2,
+				satrec.xl3, satrec.xl4, nm, z1, z2, z3, z11,
+				z12, z13, z21, z22, z23, z31, z32, z33,
+				satrec.zmol, satrec.zmos
+			);
 			snodm = is.snodm
 			cnodm = is.cnodm
 			sinim = is.sinim
@@ -2289,22 +2353,18 @@ const sgp4init = (whichconst, opsmode, satn, epoch,
 			satrec.zmol = is.zmol
 			satrec.zmos = is.zmos
 
-
-
-
-			let dpr = dpper
-				(
-					satrec.e3, satrec.ee2, satrec.peo, satrec.pgho,
-					satrec.pho, satrec.pinco, satrec.plo, satrec.se2,
-					satrec.se3, satrec.sgh2, satrec.sgh3, satrec.sgh4,
-					satrec.sh2, satrec.sh3, satrec.si2, satrec.si3,
-					satrec.sl2, satrec.sl3, satrec.sl4, satrec.t,
-					satrec.xgh2, satrec.xgh3, satrec.xgh4, satrec.xh2,
-					satrec.xh3, satrec.xi2, satrec.xi3, satrec.xl2,
-					satrec.xl3, satrec.xl4, satrec.zmol, satrec.zmos, inclm, satrec.init,
-					satrec.ecco, satrec.inclo, satrec.nodeo, satrec.argpo, satrec.mo,
-					satrec.operationmode
-				);
+			let dpr = dpper(
+				satrec.e3, satrec.ee2, satrec.peo, satrec.pgho,
+				satrec.pho, satrec.pinco, satrec.plo, satrec.se2,
+				satrec.se3, satrec.sgh2, satrec.sgh3, satrec.sgh4,
+				satrec.sh2, satrec.sh3, satrec.si2, satrec.si3,
+				satrec.sl2, satrec.sl3, satrec.sl4, satrec.t,
+				satrec.xgh2, satrec.xgh3, satrec.xgh4, satrec.xh2,
+				satrec.xh3, satrec.xi2, satrec.xi3, satrec.xl2,
+				satrec.xl3, satrec.xl4, satrec.zmol, satrec.zmos, inclm, satrec.init,
+				satrec.ecco, satrec.inclo, satrec.nodeo, satrec.argpo, satrec.mo,
+				satrec.operationmode
+			);
 			satrec.ecco = dpr.ep
 			satrec.inclo = dpr.inclp
 			satrec.nodeo = dpr.nodep
@@ -2317,22 +2377,21 @@ const sgp4init = (whichconst, opsmode, satn, epoch,
 			mm = 0.0;
 
 			let dndt = 0
-			let dsr = dsinit
-				(
-					satrec.xke,
-					cosim, emsq, satrec.argpo, s1, s2, s3, s4, s5, sinim, ss1, ss2, ss3, ss4,
-					ss5, sz1, sz3, sz11, sz13, sz21, sz23, sz31, sz33, satrec.t, tc,
-					satrec.gsto, satrec.mo, satrec.mdot, satrec.no_unkozai, satrec.nodeo,
-					satrec.nodedot, xpidot, z1, z3, z11, z13, z21, z23, z31, z33,
-					satrec.ecco, eccsq, em, argpm, inclm, mm, nm, nodem,
-					satrec.irez, satrec.atime,
-					satrec.d2201, satrec.d2211, satrec.d3210, satrec.d3222,
-					satrec.d4410, satrec.d4422, satrec.d5220, satrec.d5232,
-					satrec.d5421, satrec.d5433, satrec.dedt, satrec.didt,
-					satrec.dmdt, dndt, satrec.dnodt, satrec.domdt,
-					satrec.del1, satrec.del2, satrec.del3, satrec.xfact,
-					satrec.xlamo, satrec.xli, satrec.xni
-				);
+			let dsr = dsinit(
+				satrec.xke,
+				cosim, emsq, satrec.argpo, s1, s2, s3, s4, s5, sinim, ss1, ss2, ss3, ss4,
+				ss5, sz1, sz3, sz11, sz13, sz21, sz23, sz31, sz33, satrec.t, tc,
+				satrec.gsto, satrec.mo, satrec.mdot, satrec.no_unkozai, satrec.nodeo,
+				satrec.nodedot, xpidot, z1, z3, z11, z13, z21, z23, z31, z33,
+				satrec.ecco, eccsq, em, argpm, inclm, mm, nm, nodem,
+				satrec.irez, satrec.atime,
+				satrec.d2201, satrec.d2211, satrec.d3210, satrec.d3222,
+				satrec.d4410, satrec.d4422, satrec.d5220, satrec.d5232,
+				satrec.d5421, satrec.d5433, satrec.dedt, satrec.didt,
+				satrec.dmdt, dndt, satrec.dnodt, satrec.domdt,
+				satrec.del1, satrec.del2, satrec.del3, satrec.xfact,
+				satrec.xlamo, satrec.xli, satrec.xni
+			)
 			satrec.irez = dsr.irez
 			satrec.atime = dsr.atime
 			satrec.d2201 = dsr.d2201
@@ -2389,12 +2448,3 @@ const sgp4init = (whichconst, opsmode, satn, epoch,
 	//sgp4fix return boolean. satrec.error contains any error codes
 	return true;
 }  // sgp4init
-
-
-if (typeof exports === 'object' && typeof module !== 'undefined') {
-	module.exports = {
-		sgp4init,
-		sgp4,
-		getgravconst
-	}
-}

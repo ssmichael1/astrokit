@@ -1,6 +1,3 @@
-const { sgp4init, sgp4, getgravconst } = require("./sgp4.js")
-
-// https://en.wikipedia.org/wiki/Two-line_element_set
 
 /**
  * Class for representing two-line element set (TLE)
@@ -12,7 +9,11 @@ const { sgp4init, sgp4, getgravconst } = require("./sgp4.js")
  * kept and updated at www.space-track.org
  * 
  */
-class TLE {
+
+import { sgp4init, sgp4, getgravconst } from './sgp4.js'
+
+
+export default class TLE {
 
     /**
      * 
@@ -80,7 +81,10 @@ class TLE {
         this.mean_motion_dot_dot = Number(line1.substr(45, 7).replace('-', 'E-'))
         if (line1.substr(44, 1) === '-')
             this.mean_motion_dot_dot = -this.mean_motion_dot_dot
-        this.bstar = Number('0.' + line1.substr(54, 7).replace('-', 'E-'))
+        this.bstar = Number('0.' + line1.substr(54, 7)
+            .replace('-', 'E-')
+            .replace('+', 'E+'))
+        console.log('bstar: ' + '0.' + line1.substr(54, 7).replace('-', 'E-'))
         this.elsetnum = Number(line1.substr(64, 4))
 
         this.inclination = Number(line2.substr(8, 8))
@@ -122,7 +126,8 @@ class TLE {
             this.satrec.no = this.mean_motion / (1440 / twopi)
             this.satrec.no_kozai = this.satrec.no
             this.satrec.bstar = this.bstar
-            this.satrec.a = (this.satrec.no * this.satrec.tumin) ** (-2.0 / 3.0)
+            this.satrec.a = Math.pow(this.satrec.no * this.satrec.tumin,
+                -2.0 / 3.0)
             this.satrec.ndot = this.mean_motion_dot / (1440 * 1440 / twopi)
             this.satrec.nddot = this.mean_motion_dot_dot / (1440 * 1440 * 1440 / twopi)
             this.satrec.inclo = this.inclination * deg2rad
@@ -136,8 +141,9 @@ class TLE {
             this.satrec.init = 'y'
             this.satrec.t = 0.0
 
-            // Initialie SGP4
-            sgp4init(whichconst, 'i', this.satid, this.satrec.jdsatepoch - 2433281.5,
+            // Initialize SGP4
+            sgp4init(whichconst, 'i',
+                this.satid, this.satrec.jdsatepoch - 2433281.5,
                 this.satrec.bstar, this.satrec.ndot, this.satrec.nddot,
                 this.satrec.ecco, this.satrec.argpo, this.satrec.inclo,
                 this.satrec.mo, this.satrec.no, this.satrec.nodeo, this.satrec)
@@ -152,9 +158,4 @@ class TLE {
         return results
     }
 
-};
-
-
-if (typeof exports === 'object' && typeof module !== 'undefined') {
-    module.exports = TLE
 }

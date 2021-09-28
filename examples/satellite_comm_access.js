@@ -11,7 +11,8 @@
  */
 
 // Import the astrokit
-const ak = require('../')
+import * as ak from '../src/index.js'
+
 
 // Compute access every second over the course of a day
 // start by creating a list of times
@@ -26,7 +27,7 @@ const times = [...Array(duration).keys()]
 const minimum_elevation_deg = 5
 
 // TLE lines, as downloaded from www.space-track.org, 9/27/21
-tle_lines = [
+let tle_lines = [
     '0 TROPICS PATHFINDER',
     '1 48901U 21059Y   21269.59036393  .00002417  00000-0  14264-3 0  9991',
     '2 48901  97.5173  36.9545 0009071 297.1346  62.8960 15.12453017 14024'
@@ -57,11 +58,10 @@ let current_contact = null
 times.forEach((t) => {
 
     // Compute location of satellite at time t
-    rv = ak.sgp4(tle, t)
+    let rv = ak.sgp4(tle, t)
 
     // Rotation from TEME (inertial) to Earth-fixed frame
     // and convert to ITRFCoord object
-    const q = ak.qTEME2ITRF(t)
     let itrf = new ak.ITRFCoord(ak.qTEME2ITRF(t).rotate(rv.r))
 
     // Convert to East-North-Up position relative to ground station
@@ -95,6 +95,7 @@ times.forEach((t) => {
             }
         }
     }
+    // Ground station cannot see satellite
     else {
         // Check for end of contact
         if (current_contact !== null) {

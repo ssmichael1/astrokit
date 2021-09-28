@@ -31,7 +31,7 @@ if (inspect == undefined)
     var inspect = Symbol.for('nodejs.util.inspect.custom');
 
 
-class Quaternion {
+export default class Quaternion {
     constructor(x, y, z, w) {
         // No arguments, return unit quaternion
         if (x == undefined) {
@@ -173,15 +173,9 @@ class Quaternion {
         return `Quaternion: (Axis = [${this.axis()}], ` +
             `Angle = ${this.angle().toFixed(3)} rad)`
     }
-    [inspect](depth, opts) {
+    [inspect]() {
         return this.toString();
     }
 
 } // end of Quaternion class
 
-
-// Code for exporting the class
-if (typeof exports === 'object' && typeof module !== 'undefined')
-    module.exports = Quaternion;
-else if (typeof define === 'function' && define.amd) define(Quaternion);
-else window.Quaternion = Quaternion;

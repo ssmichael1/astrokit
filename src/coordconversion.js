@@ -12,10 +12,8 @@
  *
  */
 
-
-const Quaternion = require('./quaternion.js')
-require('./date_extensions.js')
-
+import Quaternion from './quaternion.js';
+import './date_extensions.js'
 
 /**
  * Greenwich mean sidereal time
@@ -67,7 +65,7 @@ function gast(jd_ut1) {
  * @param {Date} thedate Date for which to compute rotation
  * @returns {Quaternion} Quaternion representing the rotation
  */
-const qTEME2ITRF = (thedate) => {
+export const qTEME2ITRF = (thedate) => {
     return Quaternion.rotz(gmst(thedate.jd(Date.timescale.UTC)))
 }
 
@@ -81,7 +79,7 @@ const qTEME2ITRF = (thedate) => {
  * @param {Date} thedate Date for which to compute rotation
  * @returns {Quaternion} Quaternion representing the rotation
  */
-const qGCRS2ITRF = (thedate) => {
+export const qGCRS2ITRF = (thedate) => {
     let t = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
 
     // Compute precession rotation
@@ -140,11 +138,4 @@ const qGCRS2ITRF = (thedate) => {
 
     let q = Quaternion.mult(qP, Quaternion.mult(qN, qGast))
     return q.conj()
-}
-
-if (typeof exports === 'object' && typeof module !== 'undefined') {
-    module.exports = {
-        qTEME2ITRF,
-        qGCRS2ITRF,
-    }
 }

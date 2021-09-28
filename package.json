@@ -3,12 +3,18 @@
   "version": "0.1.0",
   "description": "Toolkit for solar system ephemerides and satellite propagation via SGP4",
   "main": "src/index.js",
+	"type": "module",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tape 'test/**/*-test.js' && eslint src"
   },
   "author": "Steven Michael (ssmichael@gmail.com)",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "rollup": "^2.57.0",
+    "tape": "^5.3.1",
+    "eslint": "^7.32.0"
+  }
 }

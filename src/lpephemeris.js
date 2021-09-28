@@ -10,15 +10,10 @@
  * 
  */
 
-if (typeof Quaternion == 'undefined') {
-    const Quaternion = require('./quaternion.js')
-    require('./date_extensions.js')
-}
-
 /**
  * Bodies for which position can be computed
  */
-const SolarSystemBodies =
+export const SolarSystemBodies =
 {
     Mercury: "Mercury",
     Venus: "Venus",
@@ -32,7 +27,7 @@ const SolarSystemBodies =
 }
 
 // Universal constants
-const univ =
+export const univ =
 {
     AU: 1.495978706910000E11,
     c: 299792458.0,
@@ -229,7 +224,7 @@ const cosd = function (a) {
  * @param {Date} thedate Date for which to compute position
  * @returns 3-vector representing moon position in GCRS frame, meters
  */
-function moonPosGCRS(thedate) {
+export function moonPosGCRS(thedate) {
     let T = (thedate.jd() - 2451545.0) / 36525.0
     let lambda_ecliptic = 218.32 + 481267.8813 * T +
         6.29 * sind(134.9 + 477198.85 * T) -
@@ -274,16 +269,13 @@ function moonPosGCRS(thedate) {
  * @param {Date} thedate Date to compute position for
  * @returns 3-vector representing position (meters) in Heliocentric frame
  */
-function bodyPosHelio(name, thedate) {
-    if (!thedate instanceof Date) {
-        throw new Error('2nd input must be Date object')
-        return
-    }
-    const deg2rad = Math.PI / 180.0
+export function bodyPosHelio(name, thedate) {
+
+    // const deg2rad = Math.PI / 180.0
     const rad2deg = 180.0 / Math.PI
 
-    T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
-    vals = lpephem[name];
+    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
+    let vals = lpephem[name];
     let a = vals[0] + vals[6] * T;
     let e = vals[1] + vals[7] * T;
     let I = vals[2] + vals[8] * T;
@@ -299,8 +291,8 @@ function bodyPosHelio(name, thedate) {
     // M = M % 180.0;
     let E = M + estar * sind(M)
     for (let i = 0; i < 5; i++) {
-        deltaM = M - (E - estar * sind(E));
-        deltaE = deltaM / (1 - e * cosd(E));
+        let deltaM = M - (E - estar * sind(E));
+        let deltaE = deltaM / (1 - e * cosd(E));
         E = E + deltaE
     }
     M = E - estar * sind(E)
@@ -341,10 +333,10 @@ function bodyPosHelio(name, thedate) {
  * @returns Sun position in Earth-centered MOD frame, meters
  * 
  */
-function SunPosMOD(thedate) {
+export function SunPosMOD(thedate) {
     let T = (thedate.getJulian() - 2451545.0) / 36525.0
     const deg2rad = Math.PI / 180.
-    const rad2deg = Math.PI / 180.
+    //const rad2deg = Math.PI / 180.
 
     // Mean longitude
     let lambda = (280.46 + 36000.77 * T);
@@ -377,7 +369,7 @@ function SunPosMOD(thedate) {
  * @param {Date} thedate Date for which to compute position
  * @returns 3-vector representing sun position in Earth-centered GCRS frame
  */
-const sunPosGCRS = (thedate) => {
+export const sunPosGCRS = (thedate) => {
     return bodyPosHelio(SolarSystemBodies.EarthMoon, thedate)
         .map(x => -1 * x)
         .eadd(moonPosGCRS(thedate).map(x => x / (1.0 + univ.EarthMoonMassRatio)))
@@ -393,7 +385,7 @@ const sunPosGCRS = (thedate) => {
  * @param {Date} thedate Time for which position is computed
  * @returns Solar system body position in Earth-centered frame
  */
-const bodyPosGCRS = (body, thedate) => {
+export const bodyPosGCRS = (body, thedate) => {
     return bodyPosHelio(body, thedate).eadd(
         bodyPosHelio(SolarSystemBodies.EarthMoon, thedate)
             .map(x => -1 * x)
@@ -402,15 +394,6 @@ const bodyPosGCRS = (body, thedate) => {
 
 }
 
-if (typeof exports === 'object' && typeof module !== 'undefined') {
-    module.exports = {
-        sunPosGCRS,
-        moonPosGCRS,
-        bodyPosHelio,
-        bodyPosGCRS,
-        univ
-    }
-}
 
 
 
