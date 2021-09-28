@@ -1,5 +1,5 @@
 {
-  "name": "@StevenSamirMichael/astrokit",
+  "name": "astrokit",
   "version": "0.1.0",
   "description": "Toolkit for solar system ephemerides and satellite propagation via SGP4",
   "keywords": [
@@ -29,9 +29,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/StevenSamirMichael/astrokit.git"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@StevenSamirMichael"
   },
   "scripts": {
     "test": "tape 'test/**/*-test.js' && eslint src",
