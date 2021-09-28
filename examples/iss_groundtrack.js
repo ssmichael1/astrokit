@@ -1,3 +1,15 @@
+/**
+ * (c) 2021 Steven Michael (ssmichael@gmail.com)
+ * 
+ * This example computes the ground track in latitude and longitude
+ * of the International Space Station over a single orbit
+ * 
+ * It makes use of:
+ *      * SGP4 propagator to compute position in inertial space
+ *      * Quaternion to rotate from inertial to Earth-fixed coordinates
+ *      * ITRFCoord to extract latitude & longitude
+ */
+
 // Import the astrokit
 import * as ak from '../src/index.js'
 
@@ -12,11 +24,7 @@ const tle_lines = [
 // Load the TLE into javascript class
 let iss = new ak.TLE(tle_lines)
 
-// How long does the ISS take to go around the earth once?
-// (in Earth-rotating frame)
-// the Mean Motion is revolutions per day
-// We will get ground track for a single revolution
-// Angle rate in radians / second
+// Get duration for a single orbit, in seconds
 let rate = Math.PI * 2 / 86400 * iss.mean_motion
 // Duration is in seconds (86400 seconds / day)
 let duration = 2 * Math.PI / rate
@@ -28,7 +36,7 @@ const times = [...Array(Math.floor(duration / dt)).keys()]
     .map(x => new Date(iss.epoch.getTime() + x * dt * 1000))
 
 
-
+// Compute latitude & longitude for each time in array
 let iss_groundtrack = times.map((t) => {
     // Get the position and velocity in the TEME coordinate frame
     // by running "sgp4" orbit propagator with iss TLE and
