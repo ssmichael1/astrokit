@@ -36,7 +36,7 @@ The <tt>tape</tt> module, https://www.npmjs.com/package/tape, is used for test m
 Examples are included in the <tt>examples</tt> directory and can be run via [Node.js](http://nodejs.org/)
 * **<tt>iss_groundtrack.js</tt>**: Given input TLE for the international space station (ISS), compute the ground track (longitude and latitude) over a single orbit
 
-* **<tt>satelellite_comm_access.js</tt>**: Given input TLE for the TROPICS Pathfinder satellite (sun synchronous orbit), compute contact times over an orbit for the communications ground station in Svalbard, Norway
+* **<tt>satellite_comm_access.js</tt>**: Given input TLE for the TROPICS Pathfinder satellite (sun synchronous orbit), compute contact times over an orbit for the communications ground station in Svalbard, Norway
 
 * **<tt>solarpanels.js</tt>**: Use sun position and rotation to Earth-fixed frame to compute maximum expected power generation of solar panel system (in this case, the one on the roof of my house)
 
