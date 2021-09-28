@@ -6,7 +6,7 @@ The Astronomy Toolkit is a javascript module for handling a few simple satellite
 
 * Propagation of two-line element sets representing satellite ephemerides via native JavaScript translation of Vallado SGP4 propagator
 * Planetary ephemerides (low precision from NASA JPL)
-* Sun & Moon ephmemerides
+* Sun & Moon ephemerides
 * Coordinate conversions between Earth-fixed and inertial space
 * Class for handling International Terrestrial Reference Frame
     * Conversion to and from geodetic coordines (latitude, longitude, height)
