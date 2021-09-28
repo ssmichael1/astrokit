@@ -1,6 +1,6 @@
 {
   "name": "astrokit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Toolkit for solar system ephemerides and satellite propagation via SGP4",
   "keywords": [
     "solar",
