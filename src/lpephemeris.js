@@ -2,9 +2,9 @@
  * (c) 2021 Steven Michael (ssmichael@gmail.com)
  *
  * Implementation of JPL low-precision ephemerides for 
- * solar system bodies
+ * solar system bodies, as well some additional ephemerides
  * 
- * For a reference, see:
+ * For a JPL reference, see:
  * https://ssd.jpl.nasa.gov/?planet_pos
  * 
  * 
