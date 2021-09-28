@@ -84,7 +84,6 @@ export default class TLE {
         this.bstar = Number('0.' + line1.substr(54, 7)
             .replace('-', 'E-')
             .replace('+', 'E+'))
-        console.log('bstar: ' + '0.' + line1.substr(54, 7).replace('-', 'E-'))
         this.elsetnum = Number(line1.substr(64, 4))
 
         this.inclination = Number(line2.substr(8, 8))
