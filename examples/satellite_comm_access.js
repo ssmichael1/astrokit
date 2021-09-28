@@ -2,7 +2,7 @@
  * (c) 2021 Steven Michael (ssmichael@gmail.com)
  *
  * This example computes ground station access times for a
- * satellite.
+ * satellite over the course of a single day
  * 
  * In this example, the satellite is the TROPICS pathfinder
  * mission (a cubesat doing passive microwave radiometry),
@@ -76,11 +76,12 @@ times.forEach((t) => {
     if (elevation > minimum_elevation_deg) {
         // Start a contact if not in one
         if (current_contact === null) {
-            current_contact = {}
-            current_contact.start_time = t
-            current_contact.min_range = range
-            current_contact.max_range = range
-            current_contact.max_elevation_deg = elevation
+            current_contact = {
+                start_time: t,
+                min_range: range,
+                max_range: range,
+                max_elevation_deg: elevation
+            }
         }
         // Track variables in contact
         else {

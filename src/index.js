@@ -14,7 +14,7 @@ export { default as ITRFCoord } from './itrfcoord.js'
 export { default as TLE } from './tle.js'
 
 // Rotation between Earth-fixed & inertial frames
-export { qTEME2ITRF, qGCRS2ITRF } from './coordconversion.js'
+export { qTEME2ITRF, qGCRS2ITRF, gmst, gast } from './coordconversion.js'
 
 // "Static" convenience function for running sgp4
 // outside of the tle class

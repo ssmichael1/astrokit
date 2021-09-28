@@ -21,7 +21,7 @@ import './date_extensions.js'
  * @param {Number} jd_ut1 The Julian date, referenced to UT1
  * @returns {Number} Greenwich mean sidereal time, radians
  */
-function gmst(jd_ut1) {
+export const gmst = (jd_ut1) => {
     let tut1 = (jd_ut1 - 2451545.0) / 36525.0
 
     // Expression below gives gmst in seconds
@@ -35,12 +35,12 @@ function gmst(jd_ut1) {
 
 
 /**
- * Greenwhich apparant sidereal time
+ * Greenwich apparant sidereal time
  * 
  * @param {Number} jd_ut1 the Julian date, referenced to UT1
  * @returns {Number} Greenwich apparant sideral time, radians
  */
-function gast(jd_ut1) {
+export const gast = (jd_ut1) => {
     // Compute equation of equinoxes
     let t = jd_ut1 - 2451545.0
     const deg2rad = Math.PI / 180.

@@ -2,9 +2,9 @@
  * (c) 2021 Steven Michael (ssmichael@gmail.com)
  *
  * Implementation of JPL low-precision ephemerides for 
- * solar system bodies
+ * solar system bodies, as well some additional ephemerides
  * 
- * For a reference, see:
+ * For a JPL reference, see:
  * https://ssd.jpl.nasa.gov/?planet_pos
  * 
  * 
@@ -225,7 +225,7 @@ const cosd = function (a) {
  * @returns 3-vector representing moon position in GCRS frame, meters
  */
 export function moonPosGCRS(thedate) {
-    let T = (thedate.jd() - 2451545.0) / 36525.0
+    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
     let lambda_ecliptic = 218.32 + 481267.8813 * T +
         6.29 * sind(134.9 + 477198.85 * T) -
         1.27 * sind(259.2 - 413335.38 * T) +
@@ -265,7 +265,7 @@ export function moonPosGCRS(thedate) {
  * https://ssd.jpl.nasa.gov/txt/aprx_pos_planets.pdf
  * 
  * 
- * @param {SolarSystemBodes} name Name of body
+ * @param {SolarSystemBodies} name Name of body
  * @param {Date} thedate Date to compute position for
  * @returns 3-vector representing position (meters) in Heliocentric frame
  */
@@ -333,8 +333,9 @@ export function bodyPosHelio(name, thedate) {
  * @returns Sun position in Earth-centered MOD frame, meters
  * 
  */
-export function SunPosMOD(thedate) {
-    let T = (thedate.getJulian() - 2451545.0) / 36525.0
+export function sunPosMOD(thedate) {
+    // Approximate UT1 with UTC
+    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
     const deg2rad = Math.PI / 180.
     //const rad2deg = Math.PI / 180.
 

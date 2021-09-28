@@ -46,24 +46,36 @@ export default class Quaternion {
         this.raw = [x, y, z, w]
     }
 
-    // Quaternion multiplication, static version
-    static mult(b, a) {
+    /**
+     * Static version of quaternion multiplication
+     *
+     * @param {Quaternion} a
+     * @param {Quaternion} b 
+     * @returns {Quaternion} a * b
+     */
+    static mult(a, b) {
         return new Quaternion(
-            a.raw[3] * b.raw[0] + a.raw[0] * b.raw[3] +
-            a.raw[1] * b.raw[2] - a.raw[2] * b.raw[1],
+            b.raw[3] * a.raw[0] + b.raw[0] * a.raw[3] +
+            b.raw[1] * a.raw[2] - b.raw[2] * a.raw[1],
 
-            a.raw[3] * b.raw[1] - a.raw[0] * b.raw[2] +
-            a.raw[1] * b.raw[3] + a.raw[2] * b.raw[0],
+            b.raw[3] * a.raw[1] - b.raw[0] * a.raw[2] +
+            b.raw[1] * a.raw[3] + b.raw[2] * a.raw[0],
 
-            a.raw[3] * b.raw[2] + a.raw[0] * b.raw[1] -
-            a.raw[1] * b.raw[0] + a.raw[2] * b.raw[3],
+            b.raw[3] * a.raw[2] + b.raw[0] * a.raw[1] -
+            b.raw[1] * a.raw[0] + b.raw[2] * a.raw[3],
 
-            a.raw[3] * b.raw[3] - a.raw[0] * b.raw[0] -
-            a.raw[1] * b.raw[1] - a.raw[2] * b.raw[2]
+            b.raw[3] * a.raw[3] - b.raw[0] * a.raw[0] -
+            b.raw[1] * a.raw[1] - b.raw[2] * a.raw[2]
         )
     }
 
-    // Quaternion multiplication, in place
+    /**
+     * 
+     * Quaternion in-place multiplication
+     * Input multiplies on the right
+     * 
+     * @param {Quaternion} a 
+     */
     mult(a) {
         this.raw =
             [a.raw[3] * this.raw[0] + a.raw[0] * this.raw[3] +
@@ -80,61 +92,117 @@ export default class Quaternion {
             ]
     }
 
-    // Static wrapper function for rotation
+    /**
+     * 
+     * Static convenience function for Quaternion
+     * rotation of a vector
+     * 
+     * @param {Quaternion} q 
+     * @param {Array length=3} v 
+     * @returns {Array length=3} rotated vector
+     */
     static rotate(q, v) {
         return q.rotate(v)
     }
 
-    // Use this quaternion to rotate an input vector
+    /**
+     * Quaternion rotation of input vector
+     * 
+     * @param {Array length=3} v 
+     * @returns {Array length=3} rotated vector
+     */
     rotate(v) {
         let qv = new Quaternion([v[0], v[1], v[2], 0])
         let vnew = Quaternion.mult(this, Quaternion.mult(qv, this.conj()))
         return [vnew.raw[0], vnew.raw[1], vnew.raw[2]]
     }
 
-    // Unit quaternion
+    /**
+     * 
+     * @returns {Quaternion} unit quaternion
+     */
     static identity() {
         return new Quaternion(0, 0, 0, 1);
     }
 
-    // Rotation of theta degrees about X axis
+    /**
+     * 
+     * Quaternion representing rotation about x axis
+     * by theta radians
+     * 
+     * @param {Number} theta Angle to rotate, in radians
+     * @returns {Quaternion}
+     */
     static rotx(theta) {
         let c2 = Math.cos(theta / 2.0)
         let s2 = Math.sin(theta / 2.0)
         return new Quaternion(s2, 0, 0, c2)
     }
 
-    // Rotation of theta degrees about Y axis
+    /**
+     * 
+     * Quaternion representing rotation about y axis
+     * by theta radians
+     * 
+     * @param {Number} theta Angle to rotate, in radians
+     * @returns {Quaternion}
+     */
     static roty(theta) {
         let c2 = Math.cos(theta / 2.0)
         let s2 = Math.sin(theta / 2.0)
         return new Quaternion(0, s2, 0, c2)
     }
 
-    // Rotation of theta degrees about Z axis
+    /**
+     *
+     * Quaternion representing rotation about z axis
+     * by theta radians
+     *
+     * @param {Number} theta Angle to rotate, in radians
+     * @returns {Quaternion}
+     */
     static rotz(theta) {
         let c2 = Math.cos(theta / 2.0)
         let s2 = Math.sin(theta / 2.0)
         return new Quaternion(0, 0, s2, c2)
     }
 
-    // Quaternion conjugate
+    /**
+     * 
+     * @returns {Quaternion} Conjugate of quaternion
+     */
     conjugate() {
         return new Quaternion([-this.raw[0], -this.raw[1],
         -this.raw[2], this.raw[3]])
     }
+    /**
+     * 
+     * @returns {Quaternion} Conjugate of quaternion
+     */
     conj() { return this.conjugate() }
 
+
+    /**
+     * 
+     * @returns {Number} Angle of rotation of quaternion, radians
+     */
     angle() {
         let a = Math.acos(this.raw[3]) * 2.0
         return a
     }
 
+    /**
+     * 
+     * @returns {Number} Angle of rotation of quaternion, degerees
+     */
     angle_deg() {
         return this.angle() * 180.0 / Math.PI
     }
 
-    // norm
+    /**
+     * 
+     * @returns {Number} Norm of quaternion
+     */
     norm() {
         let norm = 0
         for (let i = 0; i < 4; i++) {
@@ -143,7 +211,10 @@ export default class Quaternion {
         return Math.sqrt(norm)
     }
 
-    // vector norm (norm of vector elements)
+    /**
+     * 
+     * @returns {Number} Norm of vector elements of quaternion
+     */
     vnorm() {
         let vnorm = 0
         for (let i = 0; i < 3; i++) {
@@ -152,7 +223,9 @@ export default class Quaternion {
         return Math.sqrt(vnorm)
     }
 
-    // Normalize in place
+    /**
+     * Normalize the quaternion in place
+     */
     normalized() {
         let norm = this.norm()
         for (let i = 0; i < 4; i++) {
@@ -160,7 +233,10 @@ export default class Quaternion {
         }
     }
 
-    // Get axis associated with quaternion
+    /**
+     * 
+     * @returns {Array length=3} Axis of rotation of quaternion
+     */
     axis() {
         let vnorm = this.vnorm()
         if (vnorm == 0)
@@ -168,7 +244,10 @@ export default class Quaternion {
         return [this.raw[0] / vnorm, this.raw[1] / vnorm, this.raw[2] / vnorm];
     }
 
-    // Write out as string
+    /**
+     * 
+     * @returns {String} string representation of quaternion
+     */
     toString() {
         return `Quaternion: (Axis = [${this.axis()}], ` +
             `Angle = ${this.angle().toFixed(3)} rad)`

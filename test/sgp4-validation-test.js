@@ -102,23 +102,32 @@ const test_tle = (tle) => {
 
 
             // Compare norms (range)
+            // Note: the great majority of these are accurate to 1 part in 
+            // 10**9 or better.  A couple satellites do worse. I don't have
+            // a good explanation why; I'm confident the code is correct.
+            // Nevertheless, even for these couple, results are accurate 
+            // to better than 2 parts in 10**5
             test.assert(
                 Math.abs((jspos_spherical.norm - tvpos_spherical.norm) * 2 /
-                    (jspos_spherical.norm + tvpos_spherical.norm)) < 1.0e-4,
+                    (jspos_spherical.norm + tvpos_spherical.norm)) < 2.0e-5,
                 'Radius comparison at ' + nvals[0] + ' seconds after epoch'
             )
 
             // Compare azimuth
+            // Accurate to 60 microradians (12 arcsec)
+            // Again, as above, most test vectors do much much better,
+            // 1 in 10**9 or better, but a couple test vectors don't match
+            // as well.  Very strange.
             test.assert(
                 Math.abs(jspos_spherical.phi -
-                    tvpos_spherical.phi) < 1.0e-4,
+                    tvpos_spherical.phi) < 6.0e-5,
                 'Azimuth comparison at ' + nvals[0] + ' seconds after epoch'
             )
 
             // Compare elevation
             test.assert(
                 Math.abs(jspos_spherical.theta -
-                    tvpos_spherical.theta) < 1.0e-4,
+                    tvpos_spherical.theta) < 2.0e-5,
                 'Elevation comparison at ' + nvals[0] + ' seconds after epoch'
             )
         }

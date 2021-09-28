@@ -99,15 +99,17 @@ let iss_groundtrack = times.map((t) => {
 console.log(iss_groundtrack)
 ```
 
-## **Usage**
+## **Install and Build**
 
-### **Install and Build**
+### **Local Install and Build**
+
+The source code is available at: https://github.com/StevenSamirMichael/astrokit
 
 The javascript is written natively in ES6, and must be converted for use in html.  This can be done via the following:
 * Install [Node.js](https://nodejs.org/) and Node package manager
 * Install package dependencies. From top-level directory of repo, run:
     ```
-    npm run install
+    npm install
     ```
 * If desired, run test scripts
     ```
@@ -119,6 +121,16 @@ The javascript is written natively in ES6, and must be converted for use in html
     npm run build
     npm run build:min
     ```
+<br>
+
+### **Install via Package Manager**
+
+The code is also available via the Node package manager and can be added to javascript modules and applications in the standard way:
+```
+npm install astrokit
+```
+<br>
+<br>
 
 ### **Including in HTML**
 Example usage is below.  This is a javascript module, with exported name <tt>ak</tt> in the global scope created by using <tt>astrokit/dist/astrokit.min.js</tt>
@@ -163,10 +175,10 @@ Example usage is below.  This is a javascript module, with exported name <tt>ak<
 
 ## **License**
 
-```
+<tt>
 Copyright 2021 Steven Michael (ssmichael@gmail.com)
 
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-```
+</tt>

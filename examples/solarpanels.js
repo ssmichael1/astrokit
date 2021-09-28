@@ -1,8 +1,9 @@
 /*
  * (c) 2021 Steven Michael (ssmichael@gmail.com)
  *
- * Compute maximum expected solar energy for the solar panels
- * at my house in Arlington, MA USA
+ * Compute maximum expected solar power for the solar panels
+ * at my house in Arlington, Ma USA over the course of a 
+ * day given sun position
  *
  */
 
@@ -45,7 +46,8 @@ panels.strings.forEach(function (p, i) {
 // Day over which to compute, Sept. 1 2021
 let epoch = new Date(Date.UTC(2021, 8, 1))
 
-// Compute expected power every 15 minutes
+// Get an array of times
+// I will compute expected power every 15 minutes
 let tmarray = [...Array(24 * 4).keys()].map((x) => new Date(epoch.getTime() + x * 15 * 60 * 1000));
 
 // Get location as ITRF Coordinate
@@ -67,13 +69,8 @@ let sunDirENU = tmarray.map(x => new ak.ITRFCoord(
 // Define dot product
 const dot = (a, b) => a.map((x, i) => a[i] * b[i]).reduce((m, n) => m + n);
 
-// Convert date to different timezone
-// this function culled from web
-const convertTZ = (date, tzString) => {
-    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", { timeZone: tzString }));
-}
 
-// Note: For clarity we are ignoring 8-minute photon time of flight
+// Note: For simplicity & clarity we are ignoring 8-minute photon time of flight
 // refraction effects in atmosphere, etc..
 let powergen = []
 sunDirENU.forEach((sd, i) => {
