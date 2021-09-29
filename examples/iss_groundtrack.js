@@ -64,3 +64,6 @@ let iss_groundtrack = times.map((t) => {
 })
 // print output to screen
 console.log(iss_groundtrack)
+
+let rv = ak.sgp4(iss, iss.epoch)
+console.log(rv)
