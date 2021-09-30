@@ -1,8 +1,25 @@
-#define _TEST_
-
+#include <emscripten.h>
 #include <emscripten/bind.h>
 
 #include <tle.hpp>
+
+#include <functional>
+
+using namespace emscripten;
+
+float testit(void)
+{
+    return 3.0f;
+}
+
+EMSCRIPTEN_BINDINGS(wasddmsgp4)
+{
+    class_<TLE>("wasmtle")
+        .constructor<std::string, std::string, std::string>()
+        .function("sgp4", &TLE::sgp4);
+
+    function("test", testit);
+};
 
 #if defined(_TEST_)
 
