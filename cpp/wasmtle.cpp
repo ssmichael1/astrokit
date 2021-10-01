@@ -12,8 +12,9 @@ float testit(void)
     return 3.0f;
 }
 
-EMSCRIPTEN_BINDINGS(wasddmsgp4)
+EMSCRIPTEN_BINDINGS(wasmsgp4)
 {
+
     class_<TLE>("wasmtle")
         .constructor<std::string, std::string, std::string>()
         .function("sgp4", &TLE::sgp4);
