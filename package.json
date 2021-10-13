@@ -37,10 +37,15 @@
     "prepublish": "npm run build:min"
   },
   "devDependencies": {
+    "d3": "^7.1.1",
+    "d3-geo": "^3.0.1",
     "eslint": "^7.32.0",
+    "express": "^4.17.1",
     "package-preamble": "^0.1.0",
     "rollup": "^2.57.0",
     "tape": "^5.3.1",
-    "uglify-js": "^3.14.2"
+    "topojson-client": "^3.1.0",
+    "uglify-js": "^3.14.2",
+    "world-atlas": "^2.0.2"
   }
 }

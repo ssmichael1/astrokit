@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Test of AstroKit</title>
+    <meta name="author" content="Steven Michael">
+
+    <style>
+        .earth {
+            background-color: #deebf7;
+        }
+
+        .countries {
+            stroke: white;
+            fill: #5b291c;
+            stroke-width: .25;
+        }
+
+        .graticule {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: .5px;
+            stroke-opacity: .5;
+        }
+    </style>
+
+</head>
+
+<script src="astrojs/astrokit.min.js"></script>
+<script src="js/d3/dist/d3.min.js"></script>
+<script src="js/d3-geo/dist/d3-geo.min.js"></script>
+<script src="js/topojson-client/dist/topojson-client.min.js"></script>
+
+<body>
+    <div style="margin: 4px;border: solid 2px black;">
+        <div id="issmap" style="width: 100%;">
+        </div>
+    </div>
+</body>
+
+<script src=" https://d3js.org/d3.v7.min.js">
+</script>
+<script src="https://unpkg.com/topojson@3"></script>
+
+<script>
+    var width = d3.select("#issmap").node().getBoundingClientRect().width
+    var height = width / 2.0
+
+    var gndpos = null
+
+    var svg = d3.select("#issmap").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("class", "earth")
+        .attr("border", 1)
+
+    var countries;
+
+    function draw() {
+
+        let g = d3.select('svg g');
+        if (g) g.remove();
+        svg.attr('width', width)
+            .attr('height', height)
+
+        let projection = d3.geoEquirectangular()
+            .center([0, 0])
+            .fitSize([width, height], countries)
+
+        // Create path
+        let path = d3.geoPath()
+            .projection(projection);
+
+        g = svg.append("g")
+
+        g.append("g")
+            .selectAll("path")
+            .data(countries.features)
+            .enter().append("path")
+            .attr("d", path)
+            .attr("class", "countries")
+
+        // Draw graticule
+        g.append("path")
+            .datum(d3.geoGraticule().step([30, 30]))
+            .attr("class", "graticule")
+            .attr("d", path)
+
+        if (gndpos != null) {
+            let curve = {
+                "type": "Feature",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": gndpos.map(x => [x.longitude, x.latitude])
+                }
+            }
+
+            g.append("path")
+                .datum(curve)
+                .attr("d", path)
+                .attr('fill-opacity', 0)
+                .attr('stroke', 'red')
+                .attr("stroke-width", 1.5)
+
+        }
+
+    }
+
+
+
+
+
+
+
+    // load and display the World
+    d3.json("js/world-atlas/countries-110m.json").then(function (topology) {
+        countries = topojson.feature(topology, topology.objects.countries)
+        draw()
+    });
+
+    window.onresize = function () {
+        width = width = d3.select("#issmap").node().getBoundingClientRect().width
+        height = width / 2.0
+        console.log('in here')
+        draw()
+
+    }
+
+
+
+</script>
+
+
+<script>
+    function plot_groundtrack() {
+        const lines = [
+            '0 ISS(ZARYA)',
+            '1 25544U 98067A   21267.21567994  .00001839  00000-0  42318-4 0  9994',
+            '2 25544  51.6435 213.0833 0003460  47.4035  50.6925 15.48430119303944',
+        ]
+        // Default TLE function call is from wasm
+        let TLE = Module.wasmtle
+        // Convenience function to get epoch as Date object
+        TLE.prototype.epoch = function () {
+            return new Date(this.unixtime_epoch * 1000)
+        }
+
+        var tle2 = new TLE(lines)
+
+        // Equal to 1 revolution (mean motion is revs / day)
+        let rate = Math.PI * 2 / 86400 * tle2.mean_motion
+        // Plot one revolution in Earth-fixed frame, by subtracting off
+        // inclination-weighted Earth rate
+        rate = rate - ak.univ.omega_earth * Math.sin(tle2.inclination * Math.PI / 180)
+        // Duration is in seconds (86400 seconds / day)
+        // Get duration for 1 revolution (2 pi radians)
+        let duration = 2 * Math.PI / rate
+
+
+        // Create array of times for which to compute positions
+        // In this case, the start time is the "epoch" for the TLE
+        // and the times are every 10 seconds over a single orbit
+        let dt = 10
+        let times = [...Array(Math.floor(duration / dt)).keys()]
+            .map(x => new Date((tle2.unixtime_epoch + x * dt * 1) * 1000))
+
+        // find position & velocity in TEME (inertial) frame of satellite
+        // at each time in array using WASM SGP4 propagator (fast)
+        let states = tle2.sgp4(times)
+
+        // Convert to geodetic (latitude, longitude, height)
+        gndpos = states.r.map((x, i) => {
+            let itrf = new ak.ITRFCoord(ak.qTEME2ITRF(times[i]).rotate(x))
+            return {
+                time: times[i],
+                latitude: itrf.latitude_deg(),
+                longitude: itrf.longitude_deg(),
+                altitude: itrf.height()
+            }
+        })
+        draw()
+    }
+
+    var Module = {
+        // Load the WASM module
+        onRuntimeInitialized: function () {
+            plot_groundtrack()
+        }
+    };
+</script>
+
+
+
+
+<script src="wasm/wasmsgp4.js"></script>
+
+
+<script>
+    const tle_lines = [
+        '0 ISS(ZARYA)',
+        '1 25544U 98067A   21267.21567994  .00001839  00000-0  42318-4 0  9994',
+        '2 25544  51.6435 213.0833 0003460  47.4035  50.6925 15.48430119303944',
+    ]
+    var tle = new ak.TLE(tle_lines)
+    var rv = ak.sgp4(tle, tle.epoch)
+    //console.log(tle)
+    //console.log(rv)
+</script>
+
+</html>

@@ -9,10 +9,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 project(wasmsgp4 CXX)
 
 add_executable(wasmsgp4 SGP4.cpp wasmtle.cpp tle.hpp)
-target_compile_options(wasmsgp4 PRIVATE "-fPIC -O2")
+#target_compile_options(wasmsgp4 PRIVATE "-fPIC -O2")
 set_target_properties(wasmsgp4 PROPERTIES
-    LINK_FLAGS "--bind -s WASM=1 -s EXPORT_ES6=1 -s MODULARIZE=1")
-    #"--bind -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1")
+    LINK_FLAGS "--bind -s WASM=1"  )
 # set_target_properties(wasmsgp4 PROPERTIES SUFFIX ".mjs")
 
 set(CMAKE_INSTALL_PREFIX $(CMAKE_CURRENT_DIRECTORY))

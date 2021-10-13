@@ -8,7 +8,11 @@
 #include <SGP4.h>
 #include <time.h>
 
+// 3-vector
 using Vec3 = std::array<double, 3>;
+
+// Satellite state, position & velocity
+using StateType = std::pair<Vec3, Vec3>;
 
 #if defined(_TEST_)
 #include <iostream>
@@ -47,6 +51,8 @@ public:
         const std::string &input_line2 = "")
         : name_("undefined"), need_reinit_(true)
     {
+        // Handle both two-line elements sets
+        // and three-line versions, where 1st line is the name
         std::string line0 = "", line1, line2;
         if (input_line2 == "")
         {
@@ -62,6 +68,8 @@ public:
             if (name_[0] == '0')
                 name_ = name_.substr(2);
         }
+
+        // Parse the TLE
         sat_num_ = atoi(line1.substr(2, 5).c_str());
         desig_year_ = atoi(line1.substr(9, 2).c_str());
         desig_launch_ = atoi(line1.substr(11, 3).c_str());
@@ -120,19 +128,9 @@ public:
         mean_anomaly_ = atof(line2.substr(43, 8).c_str());
         mean_motion_ = atof(line2.substr(52, 11).c_str());
         rev_num_ = (int)atof(line2.substr(63, 5).c_str());
-
-#if defined(_TEST_)
-        std::cout << "inclination = " << inclination_ << std::endl;
-        std::cout << "epoch = " << jd_epoch_ << std::endl;
-        std::cout << "eccen = " << eccen_ << std::endl;
-        std::cout << "mean motion = " << mean_motion_ << std::endl;
-        std::cout << "arg of perigee = " << arg_of_perigee_ << std::endl;
-        std::cout << "name = " << name_ << std::endl;
-        std::cout << "bstar = " << bstar_ << std::endl;
-#endif
     }
 
-    std::pair<Vec3, Vec3> sgp4(double jd, std::string gravconst = "wgs84")
+    StateType sgp4(double jd, std::string gravconst = "wgs84")
     {
         gravconsttype gc = wgs84;
         if (gravconst == "wgs72")
@@ -176,16 +174,28 @@ public:
         double r[3] = {0, 0, 0};
         double v[3] = {0, 0, 0};
         bool success = SGP4Funcs::sgp4(rec_, t_since, r, v);
-        std::pair<Vec3, Vec3> retval;
+        StateType state;
         for (int i = 0; i < 3; i++)
         {
-            retval.first[i] = r[i] * 1.0e3;
-            retval.second[i] = v[i] * 1.0e3;
+            state.first[i] = r[i] * 1.0e3;
+            state.second[i] = v[i] * 1.0e3;
         }
-        return retval;
+        return state;
     }
 
-    double jd_epoch(void) const { return jd_epoch_; };
+    double jd_epoch(void) const { return jd_epoch_; }
+    double inclination(void) const { return inclination_; }
+    double eccentricity(void) const { return eccen_; };
+    double bstar(void) const { return bstar_; }
+    double mean_motion(void) const { return mean_motion_; }
+    double mean_motion_dot(void) const { return mean_motion_dot_; }
+    double mean_motion_dot_dot(void) const { return mean_motion_dot_dot_; }
+    double raan(void) const { return raan_; }
+    double arg_of_perigee(void) const { return arg_of_perigee_; }
+    double mean_anomaly(void) const { return mean_anomaly_; }
+    int rev_num(void) const { return rev_num_; }
+    std::string name(void) const { return name_; }
+    int sat_num(void) const { return sat_num_; }
 
 protected:
     std::string name_;
