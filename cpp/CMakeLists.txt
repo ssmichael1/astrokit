@@ -14,8 +14,4 @@ set_target_properties(wasmsgp4 PROPERTIES
     LINK_FLAGS "--bind -s WASM=1"  )
 # set_target_properties(wasmsgp4 PROPERTIES SUFFIX ".mjs")
 
-set(CMAKE_INSTALL_PREFIX $(CMAKE_CURRENT_DIRECTORY))
-
-#install(TARGETS wasmsgp4 DESTINATION ${CMAKE_CURRENT_SOURCE_DIR} COMPONENT executable)
-
 
