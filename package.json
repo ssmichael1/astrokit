@@ -34,13 +34,18 @@
     "test": "tape 'test/**/*-test.js' && eslint src",
     "build": "rm -rf dist && mkdir dist && rollup --banner \"$(preamble)\" -f umd -n ak -o dist/astrokit.js -- src/index.js",
     "build:min": "npm run build && uglifyjs  dist/astrokit.js -c -m -o dist/astrokit.min.js",
-    "prepublish": "npm run build:min"
+    "prepare": "npm run build:min"
   },
   "devDependencies": {
+    "d3": "^7.2.1",
+    "d3-geo": "^3.0.1",
     "eslint": "^7.32.0",
+    "express": "^4.17.2",
     "package-preamble": "^0.1.0",
     "rollup": "^2.57.0",
     "tape": "^5.3.1",
-    "uglify-js": "^3.14.2"
+    "topojson-client": "^3.1.0",
+    "uglify-js": "^3.14.2",
+    "world-atlas": "^2.0.2"
   }
 }

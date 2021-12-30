@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Test of AstroKit</title>
+    <meta name="author" content="Steven Michael">
+
+    <style>
+        .earth {
+            background-color: #deebf7;
+        }
+
+        .countries {
+            stroke: lightsteelblue;
+            fill: #5b291c;
+            stroke-width: .5;
+        }
+
+        .graticule {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: .5;
+            stroke-opacity: .5;
+        }
+    </style>
+
+</head>
+
+<script src="astrojs/astrokit.min.js"></script>
+<script src="js/d3/dist/d3.min.js"></script>
+<script src="js/d3-geo/dist/d3-geo.min.js"></script>
+<script src="js/topojson-client/dist/topojson-client.min.js"></script>
+
+<body>
+
+    <!-- ISS Groud Plot -->
+    <div style="margin: 4px;border: solid 2px black;">
+        <div id="issmap" style="width: 100%;">
+        </div>
+    </div>
+</body>
+
+
+<script src=" https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/topojson@3"></script>
+
+<script>
+    var width = d3.select("#issmap").node().getBoundingClientRect().width
+    var height = width / 2.0
+
+    var gndpos = null
+
+    var svg = d3.select("#issmap").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("class", "earth")
+        .attr("border", 1)
+
+    var countries;
+
+    function draw_iss_gndplot() {
+
+        let g = d3.select('svg g');
+        if (g) g.remove();
+        svg.attr('width', width)
+            .attr('height', height)
+
+        let projection = d3.geoEquirectangular()
+            .center([0, 0])
+            .fitSize([width, height], countries)
+
+        // Create path
+        let path = d3.geoPath()
+            .projection(projection);
+
+        g = svg.append("g")
+
+        g.append("g")
+            .selectAll("path")
+            .data(countries.features)
+            .enter().append("path")
+            .attr("d", path)
+            .attr("class", "countries")
+
+        // Draw graticule
+        g.append("path")
+            .datum(d3.geoGraticule().step([30, 30]))
+            .attr("class", "graticule")
+            .attr("d", path)
+
+        if (gndpos != null) {
+            let curve = {
+                "type": "Feature",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": gndpos.map(x => [x.longitude_deg, x.latitude_deg])
+                }
+            }
+            // Draw the ground path
+            g.append("path")
+                .datum(curve)
+                .attr("d", path)
+                .attr('fill-opacity', 0)
+                .attr('stroke', 'red')
+                .attr("stroke-width", 1.5)
+        }
+
+    }
+
+
+
+
+
+
+
+    // load contry boundaries
+    d3.json("js/world-atlas/countries-110m.json").then(function (topology) {
+        countries = topojson.feature(topology, topology.objects.countries)
+        plot_groundtrack()
+    });
+
+    // Handle resize
+    window.onresize = function () {
+        width = width = d3.select("#issmap").node().getBoundingClientRect().width
+        height = width / 2.0
+        draw_iss_gndplot()
+
+    }
+
+
+
+</script>
+
+
+<script>
+    function plot_groundtrack() {
+        const lines = [
+            '0 ISS(ZARYA)',
+            '1 25544U 98067A   21267.21567994  .00001839  00000-0  42318-4 0  9994',
+            '2 25544  51.6435 213.0833 0003460  47.4035  50.6925 15.48430119303944',
+        ]
+
+        let tle = new ak.TLE(lines)
+
+        // Equal to 1 revolution (mean motion is revs / day)
+        let rate = Math.PI * 2 / 86400 * tle.mean_motion
+        // Plot one revolution in Earth-fixed frame, by subtracting off
+        // inclination-weighted Earth rate
+        rate = rate - ak.univ.omega_earth * Math.cos(tle.inclination * Math.PI / 180)
+        // Duration is in seconds (86400 seconds / day)
+        // Get duration for 1 revolution (2 pi radians)
+        let duration = 2 * Math.PI / rate
+
+
+        // Create array of times for which to compute positions
+        // In this case, the start time is the "epoch" for the TLE
+        // and the times are every 10 seconds over a single orbit
+        let dt = 10
+        const times = [...Array(Math.floor(duration / dt)).keys()]
+            .map(x => new Date(tle.epoch.getTime() + x * dt * 1000))
+
+
+        // Get the ground position for each time
+        gndpos = times.map((t) => {
+            // Get the position and velocity in the TEME coordinate frame
+            // by running "sgp4" orbit propagator with iss TLE and
+            // desired time as input
+            let rv = ak.sgp4(tle, t)
+
+            // Get quaternion to rotate from TEME frame to ITRF frame
+            // TEME = Earth-centered pseudo-inertial frame in which sgp4
+            //        computes the positions and velocities
+            // ITRF = international terrestrial reference frame
+            // and turn it into a coordinate class
+            let itrf = new ak.ITRFCoord(ak.qTEME2ITRF(t).rotate(rv.r))
+
+            // Use the coordinate class (which is cartesian ITRF natively)
+            // to extract geodetic latitude, longitude, and height
+            return {
+                time: t,
+                latitude_deg: itrf.latitude_deg(),
+                longitude_deg: itrf.longitude_deg(),
+                height_meters: itrf.height()
+            }
+        })
+        draw_iss_gndplot()
+    }
+
+
+</script>
+
+
+
+<script>
+    const tle_lines = [
+        '0 ISS(ZARYA)',
+        '1 25544U 98067A   21267.21567994  .00001839  00000-0  42318-4 0  9994',
+        '2 25544  51.6435 213.0833 0003460  47.4035  50.6925 15.48430119303944',
+    ]
+    var tle = new ak.TLE(tle_lines)
+    var rv = ak.sgp4(tle, tle.epoch)
+</script>
+
+</html>
