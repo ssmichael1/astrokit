@@ -12,15 +12,15 @@
         }
 
         .countries {
-            stroke: white;
+            stroke: lightsteelblue;
             fill: #5b291c;
-            stroke-width: .25;
+            stroke-width: .5;
         }
 
         .graticule {
             fill: none;
             stroke: #ccc;
-            stroke-width: .5px;
+            stroke-width: .5;
             stroke-opacity: .5;
         }
     </style>
@@ -33,14 +33,15 @@
 <script src="js/topojson-client/dist/topojson-client.min.js"></script>
 
 <body>
+
+    <!-- ISS Groud Plot -->
     <div style="margin: 4px;border: solid 2px black;">
         <div id="issmap" style="width: 100%;">
         </div>
     </div>
 </body>
 
-<script src=" https://d3js.org/d3.v7.min.js">
-</script>
+<script src=" https://d3js.org/d3.v7.min.js"></script>
 <script src="https://unpkg.com/topojson@3"></script>
 
 <script>
@@ -57,7 +58,7 @@
 
     var countries;
 
-    function draw() {
+    function draw_iss_gndplot() {
 
         let g = d3.select('svg g');
         if (g) g.remove();
@@ -95,14 +96,13 @@
                     "coordinates": gndpos.map(x => [x.longitude, x.latitude])
                 }
             }
-
+            // Draw the ground path
             g.append("path")
                 .datum(curve)
                 .attr("d", path)
                 .attr('fill-opacity', 0)
                 .attr('stroke', 'red')
                 .attr("stroke-width", 1.5)
-
         }
 
     }
@@ -113,17 +113,17 @@
 
 
 
-    // load and display the World
+    // load contry boundaries
     d3.json("js/world-atlas/countries-110m.json").then(function (topology) {
         countries = topojson.feature(topology, topology.objects.countries)
-        draw()
+        draw_iss_gndplot()
     });
 
+    // Handle resize
     window.onresize = function () {
         width = width = d3.select("#issmap").node().getBoundingClientRect().width
         height = width / 2.0
-        console.log('in here')
-        draw()
+        draw_iss_gndplot()
 
     }
 
@@ -152,7 +152,7 @@
         let rate = Math.PI * 2 / 86400 * tle2.mean_motion
         // Plot one revolution in Earth-fixed frame, by subtracting off
         // inclination-weighted Earth rate
-        rate = rate - ak.univ.omega_earth * Math.sin(tle2.inclination * Math.PI / 180)
+        rate = rate - ak.univ.omega_earth * Math.cos(tle2.inclination * Math.PI / 180)
         // Duration is in seconds (86400 seconds / day)
         // Get duration for 1 revolution (2 pi radians)
         let duration = 2 * Math.PI / rate
@@ -179,7 +179,7 @@
                 altitude: itrf.height()
             }
         })
-        draw()
+        draw_iss_gndplot()
     }
 
     var Module = {
