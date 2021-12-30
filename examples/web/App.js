@@ -17,5 +17,6 @@ app.get('/', function (req, res) { res.sendFile(dirname(fileURLToPath(import.met
 app.use('/wasm', express.static('../../cpp/build/'))
 app.use('/astrojs', express.static('../../dist/'))
 app.use('/js', express.static('../../node_modules/'))
+app.use('/', express.static('./'))
 //////////////////////////////////////////////////////////
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
