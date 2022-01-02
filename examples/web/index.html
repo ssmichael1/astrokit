@@ -3,7 +3,7 @@
 <html>
 
 <head>
-    <title>Test of AstroKit</title>
+    <title>AstroKit Examples</title>
     <meta name="author" content="Steven Michael">
 
     <style>
@@ -11,10 +11,56 @@
             background-color: #deebf7;
         }
 
+        .body {
+            font-family: Sans-Serif;
+        }
+
         .countries {
             stroke: lightsteelblue;
             fill: #5b291c;
-            stroke-width: .5;
+            stroke-width: 0.75;
+        }
+
+        .tlebox {
+            border: 2px solid black;
+            font-size: 12px;
+            width: 80%;
+            margin: auto;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            background-color: pink;
+            text-align: left;
+            padding-left: 10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .mapbox {
+            fill: pink;
+            fill-opacity: 0.5;
+            stroke-width: 1.0;
+            stroke: black;
+            border-radius: 12px;
+        }
+
+        .maptext {
+            font-size: 12px;
+            font-style: sans;
+            font-family: Sans-Serif;
+            font-weight: normal;
+        }
+
+        .topbox {
+            border-radius: 24px;
+            background: #bbbbbb;
+            padding: 20px;
+            padding-right: 30px;
+            width: 92%;
+            border: solid 2px black;
+            text-align: center;
+            font-family: Sans-Serif;
+            font-weight: bold;
+            align-items: center;
         }
 
         .graticule {
@@ -33,23 +79,28 @@
 <script src="js/topojson-client/dist/topojson-client.min.js"></script>
 
 <body>
-
-    <!-- ISS Groud Plot -->
-    <div style="margin: 4px;border: solid 2px black;">
-        <div id="issmap" style="width: 100%;">
+    <div class="topbox" style="border-radius: 12px;">
+        <!-- ISS Groud Plot -->
+        <div>AstroKit Examples</div>
+    </div>
+    <br>
+    <div class="topbox">
+        <!-- ISS Groud Plot -->
+        <div>International Space Station Ground Track from TLE</div>
+        <div class="tlebox" id="isstle">asdfad</div>
+        <div class="tlebox" id="isspos"></div>
+        <div style="margin: 4px;border: solid 2px black;width: 100%;">
+            <div id="issmap" style="width: 100%;"></div>
         </div>
     </div>
 </body>
 
-
-<script src=" https://d3js.org/d3.v7.min.js"></script>
-<script src="https://unpkg.com/topojson@3"></script>
-
 <script>
     var width = d3.select("#issmap").node().getBoundingClientRect().width
     var height = width / 2.0
-
     var gndpos = null
+    var iss_tlelines = null
+    var iss_tle = null
 
     var svg = d3.select("#issmap").append("svg")
         .attr("width", width)
@@ -104,50 +155,91 @@
                 .attr('fill-opacity', 0)
                 .attr('stroke', 'red')
                 .attr("stroke-width", 1.5)
+
+        }
+
+    }
+
+    function timeout() {
+        let now = new Date(Date.now())
+        let rv = ak.sgp4(iss_tle, now)
+
+        // Get quaternion to rotate from TEME frame to ITRF frame
+        // TEME = Earth-centered pseudo-inertial frame in which sgp4
+        //        computes the positions and velocities
+        // ITRF = international terrestrial reference frame
+        // and turn it into a coordinate class
+        let q = ak.qTEME2ITRF(now)
+        let itrf = new ak.ITRFCoord(q.rotate(rv.r))
+
+        // Ground speed in Earth-fixed frame
+        // Must account for rotation of Earth
+        let omega_earth = [0, 0, ak.univ.omega_earth]
+        let efix = omega_earth.cross(itrf.raw)
+        gndspd = q.rotate(rv.v)
+        gndspd[0] = gndspd[0] - efix[0]
+        gndspd[1] = gndspd[1] - efix[1]
+        gndspd[2] = gndspd[2] - efix[2]
+        // Take vector norm to get speed in meters / second
+        gndspd = Math.sqrt(gndspd[0] ** 2 + gndspd[1] ** 2 + gndspd[2] ** 2)
+
+
+        isspos = '<p>Time: ' + now +
+            `<br>Latitude: ${itrf.latitude_deg().toFixed(3)}\xb0` +
+            `<br>Longitude: ${itrf.longitude_deg().toFixed(3)}\xb0` +
+            `<br>Altitude: ${(itrf.height() / 1e3).toFixed(1)} km` +
+            `<br>Ground Speed: ${(gndspd / 1e3).toFixed(3)} km/s`
+        document.getElementById("isspos").innerHTML = isspos
+    }
+
+    function startup() {
+
+        // load contry boundaries
+        d3.json("js/world-atlas/countries-110m.json")
+            .then(function (topology) {
+                countries = topojson.feature(topology, topology.objects.countries)
+                //d3.text("https://www.celestrak.com/NORAD/elements/stations.txt")
+
+                const tleurl = '/iss_tle'
+                d3.text(tleurl)
+                    .then(data => {
+
+                        iss_tlelines = JSON.parse(data)
+                        iss_tle = new ak.TLE(iss_tlelines)
+                        document.getElementById("isstle").innerHTML =
+                            iss_tlelines[0] + "<br>" + iss_tlelines[1] + "<br>" + iss_tlelines[2]
+                        plot_groundtrack()
+                        timeout()
+                    })
+
+
+
+                // Load TLE
+            })
+        setInterval(timeout, 1000)
+        // Handle resize
+        window.onresize = function () {
+            width = width = d3.select("#issmap").node().getBoundingClientRect().width
+            height = width / 2.0
+            draw_iss_gndplot()
+
         }
 
     }
 
 
-
-
-
-
-
-    // load contry boundaries
-    d3.json("js/world-atlas/countries-110m.json").then(function (topology) {
-        countries = topojson.feature(topology, topology.objects.countries)
-        plot_groundtrack()
-    });
-
-    // Handle resize
-    window.onresize = function () {
-        width = width = d3.select("#issmap").node().getBoundingClientRect().width
-        height = width / 2.0
-        draw_iss_gndplot()
-
-    }
-
-
+    startup()
 
 </script>
 
 
 <script>
     function plot_groundtrack() {
-        const lines = [
-            '0 ISS(ZARYA)',
-            '1 25544U 98067A   21267.21567994  .00001839  00000-0  42318-4 0  9994',
-            '2 25544  51.6435 213.0833 0003460  47.4035  50.6925 15.48430119303944',
-        ]
-
-        let tle = new ak.TLE(lines)
-
         // Equal to 1 revolution (mean motion is revs / day)
-        let rate = Math.PI * 2 / 86400 * tle.mean_motion
+        let rate = Math.PI * 2 / 86400 * iss_tle.mean_motion
         // Plot one revolution in Earth-fixed frame, by subtracting off
         // inclination-weighted Earth rate
-        rate = rate - ak.univ.omega_earth * Math.cos(tle.inclination * Math.PI / 180)
+        rate = rate - ak.univ.omega_earth * Math.cos(iss_tle.inclination * Math.PI / 180)
         // Duration is in seconds (86400 seconds / day)
         // Get duration for 1 revolution (2 pi radians)
         let duration = 2 * Math.PI / rate
@@ -157,16 +249,16 @@
         // In this case, the start time is the "epoch" for the TLE
         // and the times are every 10 seconds over a single orbit
         let dt = 10
+        let now = Date.now()
         const times = [...Array(Math.floor(duration / dt)).keys()]
-            .map(x => new Date(tle.epoch.getTime() + x * dt * 1000))
-
+            .map(x => new Date(now - x * dt * 1000))
 
         // Get the ground position for each time
         gndpos = times.map((t) => {
             // Get the position and velocity in the TEME coordinate frame
             // by running "sgp4" orbit propagator with iss TLE and
             // desired time as input
-            let rv = ak.sgp4(tle, t)
+            let rv = ak.sgp4(iss_tle, t)
 
             // Get quaternion to rotate from TEME frame to ITRF frame
             // TEME = Earth-centered pseudo-inertial frame in which sgp4
@@ -192,14 +284,5 @@
 
 
 
-<script>
-    const tle_lines = [
-        '0 ISS(ZARYA)',
-        '1 25544U 98067A   21267.21567994  .00001839  00000-0  42318-4 0  9994',
-        '2 25544  51.6435 213.0833 0003460  47.4035  50.6925 15.48430119303944',
-    ]
-    var tle = new ak.TLE(tle_lines)
-    var rv = ak.sgp4(tle, tle.epoch)
-</script>
 
 </html>

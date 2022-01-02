@@ -177,7 +177,14 @@ const lpephem = {
     ]
 };
 
-
+// Stick cross product here for lack of a better place
+Array.prototype.cross = function (other) {
+    var result = [0, 0, 0]
+    result[0] = this[1] * other[2] - this[2] * other[1];
+    result[1] = this[2] * other[0] - this[0] * other[2];
+    result[2] = this[0] * other[1] - this[1] * other[0]
+    return result
+}
 
 Array.prototype.eadd = function (other) {
     var result = []
