@@ -113,12 +113,14 @@
         }
     </style>
 
+    <link rel="stylesheet" href="/js/jquery-ui-dist/jquery-ui.min.css">
+    <script src="astrojs/astrokit.min.js"></script>
+    <script src="js/d3/dist/d3.min.js"></script>
+    <script src="js/d3-geo/dist/d3-geo.min.js"></script>
+    <script src="js/topojson-client/dist/topojson-client.min.js"></script>
+    <script src="js/jquery/dist/jquery.min.js"></script>
+    <script src="js/jquery-ui-dist/jquery-ui.min.js"></script>
 </head>
-
-<script src="astrojs/astrokit.min.js"></script>
-<script src="js/d3/dist/d3.min.js"></script>
-<script src="js/d3-geo/dist/d3-geo.min.js"></script>
-<script src="js/topojson-client/dist/topojson-client.min.js"></script>
 
 <body>
     <div class="topbox" style="border-radius: 12px;">
@@ -128,8 +130,37 @@
     <br>
     <div class="topbox">
         <!-- ISS Groud Plot -->
-        <div>International Space Station Ground Track from Two-Line Element Set</div>
-        <div class="tlebox" id="isstle">asdfad</div>
+        <div>Ground Track from Two-Line Element Set</div>
+        <div class="tlebox">
+            <div class="ui-widget">
+                <label for="satselection">Satellite: </label>
+                <input id="satselection">
+            </div>
+        </div>
+        <div class="tlebox" id="isstle"></div>
+        <div class="tlebox" style="text-align: center;margin: auto;">
+            <div class="rTable" style="margin: auto;">
+                <div class="rTableRow">
+                    <div class="rTableHead" style="width: 10%;">Epoch</div>
+                    <div class="rTableHead" style="width: 10%;">Inclination</div>
+                    <div class="rTableHead" style="width: 10%;">Eccentricity</div>
+                    <div class="rTableHead" style="width: 10%;">RAAN</div>
+                    <div class="rTableHead" style="width: 10%;">Arg of Perigee</div>
+                    <div class="rTableHead" style="width: 10%;">Mean Motion</div>
+                    <div class="rTableHead" style="width: 10%;">Mean Anomaly</div>
+                </div>
+                <div class="rTableRow">
+                    <div class="rTableCell" id="epoch" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="inclination" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="eccentricity" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="raan" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="arg_of_perigee" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="mean_motion" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="mean_anomaly" style="width: 10%;height: 24px;"></div>
+                </div>
+            </div>
+
+        </div>
         <div class="tlebox" id="isspos">
             <div class="rTable">
                 <div class="rTableRow">
@@ -173,7 +204,8 @@
         .attr("class", "earth")
         .attr("border", 1)
 
-    var countries;
+    var countries = null
+    var satnames = null
 
     function draw_iss_gndplot() {
 
@@ -333,8 +365,33 @@
             .attr("class", "sathistline")
             .attr('fill-opacity', 0)
             .attr('stroke', '#e75480')
-            .attr("stroke-width", 1.5)
+            .attr("stroke-width", 2)
             .attr("d", svg_handles.path)
+
+    }
+
+    function onSatChanged(event, ui) {
+        let satname = $('#satselection').val()
+        d3.json('/sattle/' + satname).then(data => {
+            if (data.length != 3) {
+                console.log('invalid tle')
+                return
+            }
+            iss_tlelines = data
+            iss_tle = new ak.TLE(iss_tlelines)
+            document.getElementById("isstle").innerHTML =
+                iss_tlelines[0] + "<br>" + iss_tlelines[1] + "<br>" + iss_tlelines[2]
+            $('#inclination').text(`${iss_tle.inclination.toFixed(3)}\xB0`)
+            $('#mean_motion').text(`${iss_tle.mean_motion.toFixed(3)} rev/day`)
+            $('#eccentricity').text(`${iss_tle.eccen}`)
+            $('#raan').text(`${iss_tle.raan.toFixed(3)}\xB0`)
+            $('#arg_of_perigee').text(`${iss_tle.arg_of_perigee.toFixed(3)}\xB0`)
+            $('#mean_anomaly').text(`${iss_tle.mean_anomaly.toFixed(3)}\xB0`)
+            $('#epoch').text(iss_tle.epoch)
+            compute_groundtrack()
+            draw_iss_gndplot()
+            timeout()
+        })
 
     }
 
@@ -344,36 +401,39 @@
         d3.json("js/world-atlas/countries-110m.json")
             .then(function (topology) {
                 countries = topojson.feature(topology, topology.objects.countries)
-                //d3.text("https://www.celestrak.com/NORAD/elements/stations.txt")
+                //d3.text("https://www.celestrak.com/NORAD/elements/stations.txt")                    
 
-                const tleurl = '/iss_tle'
-                d3.text(tleurl)
+                setInterval(timeout, 1000)
+                width = d3.select("#issmap").node().getBoundingClientRect().width
+
+                // Handle resize
+                window.onresize = function () {
+                    width = d3.select("#issmap").node().getBoundingClientRect().width
+                    height = width / 2.0
+                    draw_iss_gndplot()
+                    timeout()
+
+
+                }
+                d3.json('/satnames')
                     .then(data => {
+                        satnames = data
+                        $('#satselection')
+                            .autocomplete({
+                                source: function (request, response) {
+                                    var results = $.ui.autocomplete.filter(satnames, request.term);
 
-                        iss_tlelines = JSON.parse(data)
-                        iss_tle = new ak.TLE(iss_tlelines)
-                        document.getElementById("isstle").innerHTML =
-                            iss_tlelines[0] + "<br>" + iss_tlelines[1] + "<br>" + iss_tlelines[2]
-                        compute_groundtrack()
-                        draw_iss_gndplot()
-                        timeout()
+                                    response(results.slice(0, 40));
+                                },
+                                delay: 300,
+                                select: onSatChanged
+                            }
+                            )
                     })
+
+                $('#satselection').val('ISS (ZARYA)')
+                onSatChanged()
             })
-        setInterval(timeout, 1000)
-        width = d3.select("#issmap").node().getBoundingClientRect().width
-
-        // Handle resize
-        window.onresize = function () {
-            width = d3.select("#issmap").node().getBoundingClientRect().width
-            height = width / 2.0
-            draw_iss_gndplot()
-            timeout()
-
-
-        }
-        d3.json('/satnames')
-            .then(data => { console.log(data) })
-
     }
     startup()
 
@@ -386,10 +446,17 @@
         let rate = Math.PI * 2 / 86400 * iss_tle.mean_motion
         // Plot one revolution in Earth-fixed frame, by subtracting off
         // inclination-weighted Earth rate
-        rate = rate - ak.univ.omega_earth * Math.cos(iss_tle.inclination * Math.PI / 180)
+        rate = rate - ak.univ.omega_earth
+        //rate = rate - ak.univ.omega_earth * Math.sin(iss_tle.inclination * Math.PI / 180)
         // Duration is in seconds (86400 seconds / day)
         // Get duration for 1 revolution (2 pi radians)
         let duration = 2 * Math.PI / rate
+        if (duration < 0) {
+            duration = 86400
+        }
+        if (duration > 86400) {
+            duration = 86400
+        }
 
 
         // Create array of times for which to compute positions

@@ -41,6 +41,8 @@
     "d3-geo": "^3.0.1",
     "eslint": "^7.32.0",
     "express": "^4.17.2",
+    "jquery": "^3.6.0",
+    "jquery-ui-dist": "^1.13.0",
     "node-fetch-with-proxy": "^0.1.6",
     "package-preamble": "^0.1.0",
     "rollup": "^2.57.0",

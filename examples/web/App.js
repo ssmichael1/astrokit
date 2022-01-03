@@ -8,34 +8,19 @@ import fs from 'fs'
 const app = express()
 const port = 5000
 
-// On the server side, get the url
 
-
-// Get ISS TLE
-const tleurl = 'https://www.celestrak.com/NORAD/elements/stations.txt'
-var iss_tlelines = null
-fetch(tleurl)
-    .then(res => res.text())
-    .then(text => {
-        let lines = text.split('\r\n')
-        iss_tlelines = lines.slice(0, 3)
-        console.log(iss_tlelines)
-    });
 
 // Get list of active satellites
 var active_tles = null
 var satnames = null
-//const activeurl = './active.txt'
-
 function parse_active_lines(text) {
-    active_tles = text.split('\r\n')
+    active_tles = text.split('\r\n').map(element => element.trim())
     satnames = active_tles
         .filter((element, index) => {
             return index % 3 == 0;
         })
         .map(element => element.trim())
 }
-
 if (fs.existsSync('./active.txt')) {
     let lines = fs.readFileSync('./active.txt', 'utf8')
     parse_active_lines(lines)
@@ -57,12 +42,24 @@ app.get('/', function (req, res) {
 })
 // app.get('/favicon.ico', function (req, res) { res.sendFile(path.join(__dirname + "/favicon.ico")) })
 
-app.get('/iss_tle', (req, res) => {
-    res.send(iss_tlelines)
-})
+
 app.get('/satnames', (req, res) => {
     res.json(satnames)
 })
+
+// For getting TLE of specific satellite
+app.get('/sattle/:satname', (req, res) => {
+    let satname = req.params.satname
+    let idx = active_tles.indexOf(req.params.satname)
+    if (idx == -1) {
+        res.json({})
+        return
+    }
+    let tle = active_tles.slice(idx, idx + 3)
+    tle[0] = '0 ' + tle[0]
+    res.json(tle)
+})
+
 
 // Custom javascript files
 app.use('/astrojs', express.static('../../dist/'))
