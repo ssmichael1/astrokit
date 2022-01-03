@@ -247,11 +247,12 @@
         // Ground speed in Earth-fixed frame
         // Must account for rotation of Earth
         let omega_earth = [0, 0, ak.univ.omega_earth]
-        let efix = omega_earth.cross(curpos.itrf)
+        let efix = omega_earth.cross(curpos.itrf.raw)
         gndspd = q.rotate(rv.v)
         gndspd[0] = gndspd[0] - efix[0]
         gndspd[1] = gndspd[1] - efix[1]
         gndspd[2] = gndspd[2] - efix[2]
+
         // Take vector norm to get speed in meters / second
         gndspd = Math.sqrt(gndspd[0] ** 2 + gndspd[1] ** 2 + gndspd[2] ** 2)
 
@@ -291,8 +292,10 @@
         d3.selectAll('.satimg')
             .attr("transform", `translate(${iconpos})`)
 
+
         // Update sun position & terminator
-        let sunpos = new ak.ITRFCoord(q.rotate(ak.sunPosGCRS(now)))
+        // Subtract of ~ 8 minutes for light travel time from sun = 480000 milliseconds
+        let sunpos = new ak.ITRFCoord(q.rotate(ak.sunPosGCRS(new Date(now - 480000))))
         let antipode = { latitude: -sunpos.latitude_deg(), longitude: sunpos.longitude_deg() - 180 }
         if (antipode.longitude < -180) {
             antipode.longitude = antipode.longitude + 360
@@ -300,7 +303,8 @@
         sunpos[0] = sunpos[0] - width / 60
         sunpos[1] = sunpos[1] - width / 60
         sunpos = svg_handles.projection([sunpos.longitude_deg(), sunpos.latitude_deg()])
-
+        d3.selectAll('.sunimg')
+            .attr("transform", `translate(${sunpos})`)
 
         // Remove & re-draw solar terminator
         d3.selectAll('.terminator').remove()
@@ -313,8 +317,7 @@
             .attr('fill-opacity', 0.2)
             .attr('stroke', '#000000')
             .attr('d', svg_handles.path)
-        d3.selectAll('.sunimg')
-            .attr("transform", `translate(${sunpos})`)
+
 
 
 
