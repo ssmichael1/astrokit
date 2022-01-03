@@ -153,9 +153,6 @@
         <div style="margin: 4px;border: solid 2px black;width: 100%;">
             <div id="issmap" style="width: 100%;"></div>
         </div>
-        <div style="margin: 4px;border: solid 2px black;width: 100%;">
-            <div id="issmap2" style="width: 100%;"></div>
-        </div>
     </div>
 </body>
 
@@ -374,6 +371,8 @@
 
 
         }
+        d3.json('/satnames')
+            .then(data => { console.log(data) })
 
     }
     startup()

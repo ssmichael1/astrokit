@@ -41,11 +41,15 @@
     "d3-geo": "^3.0.1",
     "eslint": "^7.32.0",
     "express": "^4.17.2",
+    "node-fetch-with-proxy": "^0.1.6",
     "package-preamble": "^0.1.0",
     "rollup": "^2.57.0",
     "tape": "^5.3.1",
     "topojson-client": "^3.1.0",
     "uglify-js": "^3.14.2",
     "world-atlas": "^2.0.2"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security"
   }
 }
