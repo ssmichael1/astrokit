@@ -28,7 +28,7 @@
             margin: auto;
             margin-top: 10px;
             margin-bottom: 10px;
-            background-color: pink;
+            background-color: #ffe2e6;
             text-align: left;
             padding-left: 10px;
             padding-top: 10px;
@@ -69,6 +69,48 @@
             stroke-width: .5;
             stroke-opacity: .5;
         }
+
+        .rTable {
+            display: block;
+            width: 100%;
+        }
+
+        .rTableHeading,
+        .rTableBody,
+        .rTableFoot,
+        .rTableRow {
+            clear: both;
+        }
+
+        .rTableHead,
+        .rTableFoot {
+            background-color: #DDD;
+            font-weight: bold;
+        }
+
+        .rTableCell,
+        .rTableHead {
+            border: 1px solid #999999;
+            float: left;
+            height: 17px;
+            overflow: hidden;
+            padding: 3px 1.8%;
+            width: 16%;
+            text-align: center;
+        }
+
+        .rTableCell {
+            background-color: #fff0f3;
+        }
+
+        .rTable:after {
+            visibility: hidden;
+            display: block;
+            font-size: 0;
+            content: " ";
+            clear: both;
+            height: 0;
+        }
     </style>
 
 </head>
@@ -86,11 +128,33 @@
     <br>
     <div class="topbox">
         <!-- ISS Groud Plot -->
-        <div>International Space Station Ground Track from TLE</div>
+        <div>International Space Station Ground Track from Two-Line Element Set</div>
         <div class="tlebox" id="isstle">asdfad</div>
-        <div class="tlebox" id="isspos"></div>
+        <div class="tlebox" id="isspos">
+            <div class="rTable">
+                <div class="rTableRow">
+                    <div class="rTableHead">Time</div>
+                    <div class="rTableHead">Latitude</div>
+                    <div class="rTableHead">Longitude</div>
+                    <div class="rTableHead">Altitude</div>
+                    <div class="rTableHead">Ground Speed</div>
+                </div>
+                <div class="rTableRow">
+                    <div class="rTableCell" id="iss_time"></div>
+                    <div class="rTableCell" id="iss_latitude"></div>
+                    <div class="rTableCell" id="iss_longitude"></div>
+                    <div class="rTableCell" id="iss_altitude"></div>
+                    <div class="rTableCell" id="iss_gndspd"></div>
+                </div>
+            </div>
+        </div>
+
+
         <div style="margin: 4px;border: solid 2px black;width: 100%;">
             <div id="issmap" style="width: 100%;"></div>
+        </div>
+        <div style="margin: 4px;border: solid 2px black;width: 100%;">
+            <div id="issmap2" style="width: 100%;"></div>
         </div>
     </div>
 </body>
@@ -98,9 +162,13 @@
 <script>
     var width = d3.select("#issmap").node().getBoundingClientRect().width
     var height = width / 2.0
-    var gndpos = null
     var iss_tlelines = null
     var iss_tle = null
+    var iss_gndpos = null
+    var svg_handles = {
+        path: null,
+        projection: null
+    }
 
     var svg = d3.select("#issmap").append("svg")
         .attr("width", width)
@@ -117,65 +185,69 @@
         svg.attr('width', width)
             .attr('height', height)
 
-        let projection = d3.geoEquirectangular()
+        svg_handles.projection = d3.geoEquirectangular()
             .center([0, 0])
             .fitSize([width, height], countries)
 
         // Create path
-        let path = d3.geoPath()
-            .projection(projection);
+        svg_handles.path = d3.geoPath()
+            .projection(svg_handles.projection);
 
         g = svg.append("g")
+            .attr("class", "topgroup")
 
         g.append("g")
             .selectAll("path")
             .data(countries.features)
             .enter().append("path")
-            .attr("d", path)
+            .attr("d", svg_handles.path)
             .attr("class", "countries")
+
+        // Layer for terminator at very bottom
+        g.append("g")
+            .attr("class", "terminatorlayer")
+
 
         // Draw graticule
         g.append("path")
             .datum(d3.geoGraticule().step([30, 30]))
             .attr("class", "graticule")
-            .attr("d", path)
+            .attr("d", svg_handles.path)
 
-        if (gndpos != null) {
-            let curve = {
-                "type": "Feature",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": gndpos.map(x => [x.longitude_deg, x.latitude_deg])
-                }
-            }
-            // Draw the ground path
-            g.append("path")
-                .datum(curve)
-                .attr("d", path)
-                .attr('fill-opacity', 0)
-                .attr('stroke', 'red')
-                .attr("stroke-width", 1.5)
 
-        }
+        // Create Sun image        
+        g.append("image")
+            .attr("class", "sunimg")
+            .attr("xlink:href", "/sun.svg")
+            .attr("width", width / 30)
+            .attr("height", width / 30)
+
+        // Create Satellite image
+        g.append("image")
+            .attr("class", "satimg")
+            .attr("xlink:href", "/satellite.svg")
+            .attr("width", width / 30)
+            .attr("height", width / 30)
 
     }
 
     function timeout() {
-        let now = new Date(Date.now())
-        let rv = ak.sgp4(iss_tle, now)
+        compute_groundtrack()
+        let curpos = iss_gndpos[0];
+        let now = curpos.time
+        let rv = curpos.rv
 
         // Get quaternion to rotate from TEME frame to ITRF frame
         // TEME = Earth-centered pseudo-inertial frame in which sgp4
         //        computes the positions and velocities
         // ITRF = international terrestrial reference frame
-        // and turn it into a coordinate class
+        // a    nd turn it into a coordinate class
         let q = ak.qTEME2ITRF(now)
-        let itrf = new ak.ITRFCoord(q.rotate(rv.r))
 
         // Ground speed in Earth-fixed frame
         // Must account for rotation of Earth
         let omega_earth = [0, 0, ak.univ.omega_earth]
-        let efix = omega_earth.cross(itrf.raw)
+        let efix = omega_earth.cross(curpos.itrf)
         gndspd = q.rotate(rv.v)
         gndspd[0] = gndspd[0] - efix[0]
         gndspd[1] = gndspd[1] - efix[1]
@@ -183,18 +255,92 @@
         // Take vector norm to get speed in meters / second
         gndspd = Math.sqrt(gndspd[0] ** 2 + gndspd[1] ** 2 + gndspd[2] ** 2)
 
+        let latsign = 'E';
+        if (curpos.latitude_deg < 0) {
+            latsign = 'W'
+        }
+        let lonsign = 'N'
+        if (curpos.longitude_deg < 0) {
+            lonsign = 'S'
+        }
 
-        isspos = '<p>Time: ' + now +
-            `<br>Latitude: ${itrf.latitude_deg().toFixed(3)}\xb0` +
-            `<br>Longitude: ${itrf.longitude_deg().toFixed(3)}\xb0` +
-            `<br>Altitude: ${(itrf.height() / 1e3).toFixed(1)} km` +
-            `<br>Ground Speed: ${(gndspd / 1e3).toFixed(3)} km/s`
-        document.getElementById("isspos").innerHTML = isspos
+        // Update the text
+        const zeroPad = (num, places) => String(num).padStart(places, '0')
+        document.getElementById("iss_time").innerHTML =
+            `${zeroPad(now.getUTCHours(), 2)
+            }:${zeroPad(now.getUTCMinutes(), 2)}:${zeroPad(now.getUTCSeconds(), 2)} `
+        document.getElementById("iss_latitude").innerHTML =
+            `${Math.abs(curpos.latitude_deg.toFixed(3))}\xb0 ${latsign} `
+        document.getElementById("iss_longitude").innerHTML =
+            `${Math.abs(curpos.longitude_deg.toFixed(3))}\xb0 ${lonsign} `
+        document.getElementById("iss_altitude").innerHTML =
+            `${(curpos.itrf.height() / 1.0e3).toFixed(1)} km`
+        document.getElementById("iss_gndspd").innerHTML =
+            `${(gndspd / 1.0e3).toFixed(3)} km / s`
+
+
+
+
+
+
+
+        // Update satellite position
+        let iconpos = svg_handles.projection([curpos.longitude_deg, curpos.latitude_deg])
+        iconpos[0] = iconpos[0] - width / 50
+        iconpos[1] = iconpos[1] - width / 50
+        d3.selectAll('.satimg')
+            .attr("transform", `translate(${iconpos})`)
+
+        // Update sun position & terminator
+        let sunpos = new ak.ITRFCoord(q.rotate(ak.sunPosGCRS(now)))
+        let antipode = { latitude: -sunpos.latitude_deg(), longitude: sunpos.longitude_deg() - 180 }
+        if (antipode.longitude < -180) {
+            antipode.longitude = antipode.longitude + 360
+        }
+        sunpos[0] = sunpos[0] - width / 60
+        sunpos[1] = sunpos[1] - width / 60
+        sunpos = svg_handles.projection([sunpos.longitude_deg(), sunpos.latitude_deg()])
+
+
+        // Remove & re-draw solar terminator
+        d3.selectAll('.terminator').remove()
+        d3.selectAll('.terminatorlayer')
+            .datum(d3.geoCircle()
+                .radius(90)
+                .center([antipode.longitude, antipode.latitude]))
+            .append("path")
+            .attr("class", "terminator")
+            .attr('fill-opacity', 0.2)
+            .attr('stroke', '#000000')
+            .attr('d', svg_handles.path)
+        d3.selectAll('.sunimg')
+            .attr("transform", `translate(${sunpos})`)
+
+
+
+        // Remove and re-draw satellite history line
+        let curve = {
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": iss_gndpos.map(x => [x.longitude_deg, x.latitude_deg])
+            }
+        }
+        d3.selectAll('.sathistline').remove()
+        d3.selectAll('.topgroup')
+            .datum(curve)
+            .append("path")
+            .attr("class", "sathistline")
+            .attr('fill-opacity', 0)
+            .attr('stroke', '#e75480')
+            .attr("stroke-width", 1.5)
+            .attr("d", svg_handles.path)
+
     }
 
     function startup() {
 
-        // load contry boundaries
+        // load country boundaries
         d3.json("js/world-atlas/countries-110m.json")
             .then(function (topology) {
                 countries = topojson.feature(topology, topology.objects.countries)
@@ -208,33 +354,32 @@
                         iss_tle = new ak.TLE(iss_tlelines)
                         document.getElementById("isstle").innerHTML =
                             iss_tlelines[0] + "<br>" + iss_tlelines[1] + "<br>" + iss_tlelines[2]
-                        plot_groundtrack()
+                        compute_groundtrack()
+                        draw_iss_gndplot()
                         timeout()
                     })
-
-
-
-                // Load TLE
             })
         setInterval(timeout, 1000)
+        width = d3.select("#issmap").node().getBoundingClientRect().width
+
         // Handle resize
         window.onresize = function () {
-            width = width = d3.select("#issmap").node().getBoundingClientRect().width
+            width = d3.select("#issmap").node().getBoundingClientRect().width
             height = width / 2.0
             draw_iss_gndplot()
+            timeout()
+
 
         }
 
     }
-
-
     startup()
 
 </script>
 
 
 <script>
-    function plot_groundtrack() {
+    function compute_groundtrack() {
         // Equal to 1 revolution (mean motion is revs / day)
         let rate = Math.PI * 2 / 86400 * iss_tle.mean_motion
         // Plot one revolution in Earth-fixed frame, by subtracting off
@@ -254,7 +399,7 @@
             .map(x => new Date(now - x * dt * 1000))
 
         // Get the ground position for each time
-        gndpos = times.map((t) => {
+        iss_gndpos = times.map((t) => {
             // Get the position and velocity in the TEME coordinate frame
             // by running "sgp4" orbit propagator with iss TLE and
             // desired time as input
@@ -271,12 +416,13 @@
             // to extract geodetic latitude, longitude, and height
             return {
                 time: t,
+                rv: rv,
+                itrf: itrf,
                 latitude_deg: itrf.latitude_deg(),
                 longitude_deg: itrf.longitude_deg(),
                 height_meters: itrf.height()
             }
         })
-        draw_iss_gndplot()
     }
 
 
