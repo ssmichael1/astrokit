@@ -104,6 +104,10 @@ app.get('/location/:location', (req, res) => {
         })
         response.on('end', () => {
             let js = JSON.parse(data)
+            if (js.status != 'OK') {
+                res.json({})
+                return
+            }
             res.json(js.results[0].geometry.location)
         })
     })
