@@ -10,6 +10,9 @@
  * 
  */
 
+import ITRFCoord from './itrfcoord.js'
+import qGCRS2ITRF from './coordconversion.js'
+
 /**
  * Bodies for which position can be computed
  */
@@ -383,6 +386,23 @@ export const sunPosGCRS = (thedate) => {
         .eadd(moonPosGCRS(thedate).map(x => x / (1.0 + univ.EarthMoonMassRatio)))
 
 }
+
+/**
+ * 
+ * Compute sun position in Earth-centered ITRF frame
+ * using low-precision ephemerides provided by JPL
+ * 
+ * @param {Date} thedate Date for which to compute position
+ * @returns 3-vector representing sun position in Earth-centered GCRS frame
+ */
+export const sunPosITRF = (thedate) => {
+    return ITRFCoord(
+        qGCRS2ITRF(thedate).rotate(bodyPosHelio(SolarSystemBodies.EarthMoon, thedate)
+            .map(x => -1 * x)
+            .eadd(moonPosGCRS(thedate).map(x => x / (1.0 + univ.EarthMoonMassRatio)))))
+
+}
+
 
 /**
  * 

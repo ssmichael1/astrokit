@@ -3,7 +3,7 @@
 <html>
 
 <head>
-    <title>AstroKit Examples</title>
+    <title>Satellite Ground Track</title>
     <meta name="author" content="Steven Michael">
 
     <style>
@@ -24,8 +24,7 @@
         .tlebox {
             border: 2px solid black;
             font-size: 12px;
-            width: 80%;
-            margin: auto;
+            width: 100%;
             margin-top: 10px;
             margin-bottom: 10px;
             background-color: #ffe2e6;
@@ -33,6 +32,7 @@
             padding-left: 10px;
             padding-top: 10px;
             padding-bottom: 10px;
+            align-items: center;
         }
 
         .mapbox {
@@ -56,11 +56,13 @@
             padding: 20px;
             padding-right: 30px;
             width: 92%;
+            margin: auto;
             border: solid 2px black;
             text-align: center;
             font-family: Sans-Serif;
             font-weight: bold;
             align-items: center;
+            margin-bottom: 20px;
         }
 
         .graticule {
@@ -123,22 +125,47 @@
 </head>
 
 <body>
-    <div class="topbox" style="border-radius: 12px;">
-        <!-- ISS Groud Plot -->
-        <div>AstroKit Examples</div>
+    <!--
+    <div class="topbox" style="border-radius: 12px;">        
+    <div>AstroKit Examples</div>
     </div>
+    -->
     <br>
     <div class="topbox">
-        <!-- ISS Groud Plot -->
-        <div>Ground Track from Two-Line Element Set</div>
+        <!-- Ground Plot -->
+        <div style="margin: 4px;border: solid 2px black;width: 100%;">
+            <div id="issmap" style="width: 100%;"></div>
+        </div>
         <div class="tlebox">
             <div class="ui-widget">
                 <label for="satselection">Satellite: </label>
-                <input id="satselection">
+                <input id="satselection" style="width: 200px;">
+            </div>
+            <div style="padding-bottom: 20px;"></div>
+
+            <div class="rTable">
+                <div class="rTableRow">
+                    <div class="rTableHead">UTC Time</div>
+                    <div class="rTableHead">Latitude</div>
+                    <div class="rTableHead">Longitude</div>
+                    <div class="rTableHead">Altitude</div>
+                    <div class="rTableHead">Ground Speed</div>
+                </div>
+                <div class="rTableRow">
+                    <div class="rTableCell" id="iss_time"></div>
+                    <div class="rTableCell" id="iss_latitude"></div>
+                    <div class="rTableCell" id="iss_longitude"></div>
+                    <div class="rTableCell" id="iss_altitude"></div>
+                    <div class="rTableCell" id="iss_gndspd"></div>
+                </div>
             </div>
         </div>
-        <div class="tlebox" id="isstle"></div>
+
         <div class="tlebox" style="text-align: center;margin: auto;">
+            <div style="text-align: left;">
+                <h3>Two-Line Element Set</h3>
+            </div>
+            <div id="isstle" style="padding-bottom: 20px;text-align: left;font-family: monospace;"></div>
             <div class="rTable" style="margin: auto;">
                 <div class="rTableRow">
                     <div class="rTableHead" style="width: 10%;">Epoch</div>
@@ -161,38 +188,29 @@
             </div>
 
         </div>
-        <div class="tlebox" id="isspos">
-            <div class="rTable">
-                <div class="rTableRow">
-                    <div class="rTableHead">Time</div>
-                    <div class="rTableHead">Latitude</div>
-                    <div class="rTableHead">Longitude</div>
-                    <div class="rTableHead">Altitude</div>
-                    <div class="rTableHead">Ground Speed</div>
-                </div>
-                <div class="rTableRow">
-                    <div class="rTableCell" id="iss_time"></div>
-                    <div class="rTableCell" id="iss_latitude"></div>
-                    <div class="rTableCell" id="iss_longitude"></div>
-                    <div class="rTableCell" id="iss_altitude"></div>
-                    <div class="rTableCell" id="iss_gndspd"></div>
-                </div>
+
+        <div class="tlebox">
+            <div style="text-align: left;">
+                <h3>Ground Station Contacts Over Previous 24 Hours</h3>
+            </div>
+
+
+            <div class="ui-widget">
+                <label for="gndstationloc">Ground Station Location:</label>
+                <input id="gndstationloc" style="width: 400px;">
             </div>
         </div>
-
-
-        <div style="margin: 4px;border: solid 2px black;width: 100%;">
-            <div id="issmap" style="width: 100%;"></div>
-        </div>
     </div>
+
+
 </body>
 
 <script>
     var width = d3.select("#issmap").node().getBoundingClientRect().width
     var height = width / 2.0
-    var iss_tlelines = null
-    var iss_tle = null
-    var iss_gndpos = null
+    var tlelines = null
+    var tle = null
+    var gndpos = null
     var svg_handles = {
         path: null,
         projection: null
@@ -207,7 +225,7 @@
     var countries = null
     var satnames = null
 
-    function draw_iss_gndplot() {
+    function draw_gndplot() {
 
         let g = d3.select('svg g');
         if (g) g.remove();
@@ -262,7 +280,7 @@
 
     function timeout() {
         compute_groundtrack()
-        let curpos = iss_gndpos[0];
+        let curpos = gndpos[0];
         let now = curpos.time
         let rv = curpos.rv
 
@@ -308,12 +326,6 @@
         document.getElementById("iss_gndspd").innerHTML =
             `${(gndspd / 1.0e3).toFixed(3)} km / s`
 
-
-
-
-
-
-
         // Update satellite position
         let iconpos = svg_handles.projection([curpos.longitude_deg, curpos.latitude_deg])
         iconpos[0] = iconpos[0] - width / 50
@@ -355,7 +367,7 @@
             "type": "Feature",
             "geometry": {
                 "type": "LineString",
-                "coordinates": iss_gndpos.map(x => [x.longitude_deg, x.latitude_deg])
+                "coordinates": gndpos.map(x => [x.longitude_deg, x.latitude_deg])
             }
         }
         d3.selectAll('.sathistline').remove()
@@ -377,19 +389,19 @@
                 console.log('invalid tle')
                 return
             }
-            iss_tlelines = data
-            iss_tle = new ak.TLE(iss_tlelines)
+            tlelines = data
+            tle = new ak.TLE(tlelines)
             document.getElementById("isstle").innerHTML =
-                iss_tlelines[0] + "<br>" + iss_tlelines[1] + "<br>" + iss_tlelines[2]
-            $('#inclination').text(`${iss_tle.inclination.toFixed(3)}\xB0`)
-            $('#mean_motion').text(`${iss_tle.mean_motion.toFixed(3)} rev/day`)
-            $('#eccentricity').text(`${iss_tle.eccen}`)
-            $('#raan').text(`${iss_tle.raan.toFixed(3)}\xB0`)
-            $('#arg_of_perigee').text(`${iss_tle.arg_of_perigee.toFixed(3)}\xB0`)
-            $('#mean_anomaly').text(`${iss_tle.mean_anomaly.toFixed(3)}\xB0`)
-            $('#epoch').text(iss_tle.epoch)
+                tlelines[0] + "<br>" + tlelines[1] + "<br>" + tlelines[2]
+            $('#inclination').text(`${tle.inclination.toFixed(3)}\xB0`)
+            $('#mean_motion').text(`${tle.mean_motion.toFixed(3)} rev/day`)
+            $('#eccentricity').text(`${tle.eccen}`)
+            $('#raan').text(`${tle.raan.toFixed(3)}\xB0`)
+            $('#arg_of_perigee').text(`${tle.arg_of_perigee.toFixed(3)}\xB0`)
+            $('#mean_anomaly').text(`${tle.mean_anomaly.toFixed(3)}\xB0`)
+            $('#epoch').text(tle.epoch)
             compute_groundtrack()
-            draw_iss_gndplot()
+            draw_gndplot()
             timeout()
         })
 
@@ -410,7 +422,7 @@
                 window.onresize = function () {
                     width = d3.select("#issmap").node().getBoundingClientRect().width
                     height = width / 2.0
-                    draw_iss_gndplot()
+                    draw_gndplot()
                     timeout()
 
 
@@ -433,6 +445,14 @@
 
                 $('#satselection').val('ISS (ZARYA)')
                 onSatChanged()
+
+                $('#gndstationloc').change(() => {
+                    d3.json('/location/' + $('#gndstationloc').val())
+                        .then((data) => {
+                            console.log('got data')
+                            console.log(data)
+                        })
+                })
             })
     }
     startup()
@@ -443,7 +463,7 @@
 <script>
     function compute_groundtrack() {
         // Equal to 1 revolution (mean motion is revs / day)
-        let rate = Math.PI * 2 / 86400 * iss_tle.mean_motion
+        let rate = Math.PI * 2 / 86400 * tle.mean_motion
         // Plot one revolution in Earth-fixed frame, by subtracting off
         // inclination-weighted Earth rate
         rate = rate - ak.univ.omega_earth
@@ -468,11 +488,11 @@
             .map(x => new Date(now - x * dt * 1000))
 
         // Get the ground position for each time
-        iss_gndpos = times.map((t) => {
+        gndpos = times.map((t) => {
             // Get the position and velocity in the TEME coordinate frame
             // by running "sgp4" orbit propagator with iss TLE and
             // desired time as input
-            let rv = ak.sgp4(iss_tle, t)
+            let rv = ak.sgp4(tle, t)
 
             // Get quaternion to rotate from TEME frame to ITRF frame
             // TEME = Earth-centered pseudo-inertial frame in which sgp4
