@@ -21,6 +21,28 @@
             stroke-width: 0.75;
         }
 
+        .row {
+            display: flex;
+            padding-bottom: 10px;
+        }
+
+        .lcolumn,
+        .rcolumn {
+            font-size: 14px;
+        }
+
+        .lcolumn {
+            text-align: left;
+            padding-left: 4px;
+        }
+
+        .rcolumn {
+            text-align: right;
+            padding-right: 4px;
+            width: 15%;
+        }
+
+
         .tlebox {
             border: 2px solid black;
             font-size: 12px;
@@ -163,7 +185,7 @@
 
         <div class="tlebox" style="text-align: center;margin: auto;">
             <div style="text-align: left;">
-                <h3>Two-Line Element Set</h3>
+                <h3>Orbital Elements</h3>
             </div>
             <div id="isstle" style="padding-bottom: 20px;text-align: left;font-family: monospace;"></div>
             <div class="rTable" style="margin: auto;">
@@ -190,16 +212,26 @@
         </div>
 
         <div class="tlebox">
-            <div style="text-align: left;">
+            <div style="text-align: left;font-size: 16px;">
                 <h3>Ground Station Contacts Over Previous 24 Hours</h3>
             </div>
 
-
-            <div class="ui-widget">
-                <label for="gndstationloc">Ground Station Location:</label>
-                <input id="gndstationloc" style="width: 400px;">
+            <div style="align-items: left;">
+                <div class="row">
+                    <div class="rcolumn">Ground Station:</div>
+                    <div class="lcolumn">
+                        <input id="gndstationloc" style="width: 400px;">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="rcolumn">Geodetic Position:</div>
+                    <div class="lcolumn" id="gndlatlon"></div>
+                </div>
             </div>
         </div>
+
+
+    </div>
     </div>
 
 
@@ -215,6 +247,7 @@
         path: null,
         projection: null
     }
+    var gndcontacts = {}
 
     var svg = d3.select("#issmap").append("svg")
         .attr("width", width)
@@ -303,13 +336,13 @@
         // Take vector norm to get speed in meters / second
         gndspd = Math.sqrt(gndspd[0] ** 2 + gndspd[1] ** 2 + gndspd[2] ** 2)
 
-        let latsign = 'E';
+        let latsign = 'N';
         if (curpos.latitude_deg < 0) {
-            latsign = 'W'
+            latsign = 'S'
         }
-        let lonsign = 'N'
+        let lonsign = 'E'
         if (curpos.longitude_deg < 0) {
-            lonsign = 'S'
+            lonsign = 'W'
         }
 
         // Update the text
@@ -407,6 +440,21 @@
 
     }
 
+    const update_gndcontacts = () => {
+        let latsign = 'N';
+        if (gndcontacts.gndloc.lat < 0) {
+            latsign = 'S'
+        }
+        let lngsign = 'E'
+        if (gndcontacts.gndloc.lng < 0) {
+            lngsign = 'W'
+        }
+        $('#gndlatlon').text(
+            `${Math.abs(gndcontacts.gndloc.lat.toFixed(3))}\xB0 ${latsign}, ` +
+            `${Math.abs(gndcontacts.gndloc.lng.toFixed(3))}\xB0 ${lngsign}`
+        )
+    }
+
     function startup() {
 
         // load country boundaries
@@ -449,8 +497,18 @@
                 $('#gndstationloc').change(() => {
                     d3.json('/location/' + $('#gndstationloc').val())
                         .then((data) => {
-                            console.log('got data')
-                            console.log(data)
+                            gndcontacts = {};
+                            if (data.hasOwnProperty('lat')) {
+                                gndcontacts = {
+                                    gndloc: {
+                                        lat: data.lat,
+                                        lng: data.lng,
+                                    }
+                                };
+                                console.log(gndcontacts)
+                                update_gndcontacts()
+                            }
+
                         })
                 })
             })
