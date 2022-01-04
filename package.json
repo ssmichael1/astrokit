@@ -37,24 +37,21 @@
     "prepare": "npm run build:min"
   },
   "devDependencies": {
-    "@googlemaps/google-maps-services-js": "^3.3.5",
+    "axios": "^0.24.0",
     "d3": "^7.2.1",
     "d3-geo": "^3.0.1",
     "eslint": "^7.32.0",
     "express": "^4.17.2",
-    "https-proxy-agent": "^5.0.0",
+    "fs": "^0.0.1-security",
     "jquery": "^3.6.0",
     "jquery-ui-dist": "^1.13.0",
-    "node-fetch-with-proxy": "^0.1.6",
     "package-preamble": "^0.1.0",
     "rollup": "^2.57.0",
     "tape": "^5.3.1",
     "topojson-client": "^3.1.0",
     "uglify-js": "^3.14.2",
-    "world-atlas": "^2.0.2"
-  },
-  "dependencies": {
-    "fs": "^0.0.1-security",
-    "https": "^1.0.0"
+    "url": "^0.11.0",
+    "world-atlas": "^2.0.2",
+    "https-proxy-agent": "^5.0.0"
   }
 }

@@ -1,22 +1,32 @@
 import express from 'express'
-//ar path = require('path');
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-import fetch from 'node-fetch-with-proxy'
 import fs from 'fs'
-import https from 'https'
+import axios from 'axios'
 import HttpsProxyAgent from 'https-proxy-agent'
-//import { Client } from "@googlemaps/google-maps-services-js";
 
 const app = express()
 const port = 5000
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// For getting locations
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
 
 // Get list of active satellites
 var active_tles = null
 var satnames = null
+
+
+const axios_config = (query_url) => {
+    let config = { url: query_url }
+    if (process.env.https_proxy != undefined) {
+        config.proxy = false;
+        config.httpsAgent = new HttpsProxyAgent(process.env.https_proxy)
+    }
+    return config
+}
+
 function parse_active_lines(text) {
     active_tles = text.split('\r\n').map(element => element.trim())
     satnames = active_tles
@@ -25,25 +35,26 @@ function parse_active_lines(text) {
         })
         .map(element => element.trim())
 }
-if (fs.existsSync('./active.txt')) {
-    let lines = fs.readFileSync('./active.txt', 'utf8')
-    parse_active_lines(lines)
+const get_active_sats = async () => {
+    if (fs.existsSync('./active.txt')) {
+        let lines = fs.readFileSync('./active.txt', 'utf8')
+        parse_active_lines(lines)
+    }
+    else {
+        console.log('loading active satellites from celestrak')
+        const activeurl = 'https://celestrak.com/NORAD/elements/active.txt'
+        let res = await axios.request(axios_config(activeurl))
+        parse_active_lines(res.data)
+    }
 }
-else {
-    console.log('loading active satellites from celestrak')
-    const activeurl = 'https://celestrak.com/NORAD/elements/active.txt'
-    fetch(activeurl)
-        .then(res => res.text())
-        .then(text => {
-            parse_active_lines(text)
-        })
-}
+
+await get_active_sats()
 
 // Some definitions for static files
 app.get('/', function (req, res) {
-
     res.sendFile(dirname(fileURLToPath(import.meta.url)) + '/index.html')
 })
+
 app.get('/favicon.ico', function (req, res) {
     let fname = join(__dirname + "/satellite.ico")
     res.sendFile(fname)
@@ -67,10 +78,22 @@ app.get('/sattle/:satname', (req, res) => {
 })
 
 
-// For getting locations
-let GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
-console.log(GOOGLE_API_KEY)
-app.get('/location/:location', (req, res) => {
+const getLocation = async (loc) => {
+    const BASE_URL = 'https://maps.googleapis.com/' +
+        'maps/api/geocode/json?address='
+    let query_url = BASE_URL + loc.replace(' ', '%20')
+        + '&key=' + GOOGLE_API_KEY
+
+    try {
+        const response = await axios.request(axios_config(query_url))
+        return response
+    }
+    catch (err) {
+        return ({ status: -1 })
+    }
+}
+
+app.get('/location/:location', async (req, res) => {
     let loc = req.params.location
     console.log(loc)
 
@@ -84,39 +107,20 @@ app.get('/location/:location', (req, res) => {
         }
     }
     catch (e) { }
-
-    const BASE_URL = 'https://maps.googleapis.com/maps/api/geocode/json?address='
-    let url = BASE_URL + loc.replace(' ', '%20') + '&key=' + GOOGLE_API_KEY
-    console.log(url)
-    let options = {
-        agent: https.defaultAgent,
-        hostname: 'maps.googleapis.com',
-        path: encodeURI('/maps/api/geocode/json?address=' + loc + '&key=' + GOOGLE_API_KEY),
-        method: 'GET'
-    }
-    if (process.env.https_proxy != undefined) {
-        options.agent = new HttpsProxyAgent(process.env.https_proxy)
-    }
-    const hreq = https.request(options, (response) => {
-        let data = ''
-        response.on('data', (chunk) => {
-            data = data + chunk.toString()
-        })
-        response.on('end', () => {
-            let js = JSON.parse(data)
-            if (js.status != 'OK') {
-                res.json({})
-                return
-            }
-            res.json(js.results[0].geometry.location)
-        })
-    })
-    hreq.on('error', (error) => {
-        console.log('error: ' + error)
+    let resp2 = await getLocation(loc)
+    // 
+    if (resp2.status != 200) {
         res.json({})
-    })
-    hreq.end()
+        return
+    }
+    if (resp2.data.status != 'OK') {
+        res.json({})
+        return
+    }
+    res.json(resp2.data.results[0].geometry.location)
 })
+
+
 
 // Custom javascript files
 app.use('/astrojs', express.static('../../dist/'))
