@@ -228,6 +228,9 @@
                     <div class="lcolumn" id="gndlatlon"></div>
                 </div>
             </div>
+
+            <div id="gndcontactlist"></div>
+
         </div>
 
 
@@ -242,7 +245,7 @@
     var height = width / 2.0
     var tlelines = null
     var tle = null
-    var gndpos = null
+    var satpos = null
     var svg_handles = {
         path: null,
         projection: null
@@ -313,7 +316,7 @@
 
     function timeout() {
         compute_groundtrack()
-        let curpos = gndpos[0];
+        let curpos = satpos[0];
         let now = curpos.time
         let rv = curpos.rv
 
@@ -400,7 +403,7 @@
             "type": "Feature",
             "geometry": {
                 "type": "LineString",
-                "coordinates": gndpos.map(x => [x.longitude_deg, x.latitude_deg])
+                "coordinates": satpos.map(x => [x.longitude_deg, x.latitude_deg])
             }
         }
         d3.selectAll('.sathistline').remove()
@@ -453,7 +456,102 @@
             `${Math.abs(gndcontacts.gndloc.lat.toFixed(3))}\xB0 ${latsign}, ` +
             `${Math.abs(gndcontacts.gndloc.lng.toFixed(3))}\xB0 ${lngsign}`
         )
+
+        let gnditrf = ak.ITRFCoord.fromGeodetic(gndcontacts.gndloc.lat * Math.PI / 180.0,
+            gndcontacts.gndloc.lng * Math.PI / 180.0,
+            0)
+
+        let q = gnditrf.qENU2ITRF().conjugate()
+
+        // Compute East-North-Up position from ground station
+        /*
+        let enu = satpos.map(p => {
+            let itrf_diff = [0, 0, 0]
+            itrf_diff[0] = p.itrf.raw[0] - gnditrf.raw[0]
+            itrf_diff[1] = p.itrf.raw[1] - gnditrf.raw[1]
+            itrf_diff[2] = p.itrf.raw[2] - gnditrf.raw[2]
+            let enu_diff = q.rotate(itrf_diff)
+            return {
+                time: p.time,
+                enu: enu_diff,
+                elevation: Math.asin(enu_diff[2] /
+                    Math.sqrt(enu_diff[0] ** 2 + enu_diff[1] ** 2)) * 180.0 / Math.PI,
+                azimuth: Math.atan2(enu_diff[1], enu_diff[0]) * 180.0 / Math.PI
+            }
+        })
+        */
+        let now = new Date(Date.now())
+        let enu = [...Array(86400).keys()].map(x => {
+            let t = new Date(now - 86400 * 1000 + x * 1000)
+            let qteme2itrf = ak.qTEME2ITRF(t)
+            let rv = ak.sgp4(tle, t)
+            let p = qteme2itrf.rotate(rv.r)
+            let itrf_diff = [0, 0, 0]
+            itrf_diff[0] = p[0] - gnditrf.raw[0]
+            itrf_diff[1] = p[1] - gnditrf.raw[1]
+            itrf_diff[2] = p[2] - gnditrf.raw[2]
+            let enu_diff = q.rotate(itrf_diff)
+            return {
+                time: t,
+                enu: enu_diff,
+                elevation: Math.asin(enu_diff[2] /
+                    Math.sqrt(enu_diff[0] ** 2 + enu_diff[1] ** 2 + enu_diff[2] ** 2)) * 180.0 / Math.PI,
+                azimuth: Math.atan2(enu_diff[1], enu_diff[0]) * 180.0 / Math.PI
+            }
+
+        })
+
+        const minelevation = 5
+        // Get indices where we are above minimum elevation
+        let idx = enu
+            .map((v, index) => {
+                if (v.elevation > minelevation) {
+                    return index
+                }
+                return -1
+            })
+            .filter(v => { return (v > 0) })
+        let breaks = idx
+            .slice(1).map((v, index) => { return v - idx[index] })
+            .map((v, index) => {
+                if (v > 1) {
+                    return index;
+                }
+                return -1;
+            })
+            .filter(v => { return v > 0 })
+
+        breaks.unshift(-1)
+        let passes = breaks
+            .slice(1, breaks.length)
+            .map((b, index) => {
+                return {
+                    starttime: enu[idx[breaks[index] + 1]].time,
+                    stoptime: enu[idx[breaks[index + 1]]].time
+                }
+            })
+        console.log(passes)
+
+
+
     }
+
+    $('#gndstationloc').change(() => {
+        d3.json('/location/' + $('#gndstationloc').val())
+            .then((data) => {
+                gndcontacts = {};
+                if (data.hasOwnProperty('lat')) {
+                    gndcontacts = {
+                        gndloc: {
+                            lat: data.lat,
+                            lng: data.lng,
+                        }
+                    };
+                    update_gndcontacts()
+                }
+
+            })
+    })
 
     function startup() {
 
@@ -491,29 +589,19 @@
                             )
                     })
 
-                $('#satselection').val('ISS (ZARYA)')
+                $('#satselection').val('TROPICS PATHFINDER')
                 onSatChanged()
 
-                $('#gndstationloc').change(() => {
-                    d3.json('/location/' + $('#gndstationloc').val())
-                        .then((data) => {
-                            gndcontacts = {};
-                            if (data.hasOwnProperty('lat')) {
-                                gndcontacts = {
-                                    gndloc: {
-                                        lat: data.lat,
-                                        lng: data.lng,
-                                    }
-                                };
-                                console.log(gndcontacts)
-                                update_gndcontacts()
-                            }
+                $('#gndstationloc').val('{ "lat": 77.875, "lng": 20.975 }')
+                $('#gndstationloc').trigger('change')
 
-                        })
-                })
             })
+
     }
     startup()
+
+
+
 
 </script>
 
@@ -546,7 +634,7 @@
             .map(x => new Date(now - x * dt * 1000))
 
         // Get the ground position for each time
-        gndpos = times.map((t) => {
+        satpos = times.map((t) => {
             // Get the position and velocity in the TEME coordinate frame
             // by running "sgp4" orbit propagator with iss TLE and
             // desired time as input

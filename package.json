@@ -43,6 +43,7 @@
     "eslint": "^7.32.0",
     "express": "^4.17.2",
     "fs": "^0.0.1-security",
+    "https-proxy-agent": "^5.0.0",
     "jquery": "^3.6.0",
     "jquery-ui-dist": "^1.13.0",
     "package-preamble": "^0.1.0",
@@ -51,7 +52,9 @@
     "topojson-client": "^3.1.0",
     "uglify-js": "^3.14.2",
     "url": "^0.11.0",
-    "world-atlas": "^2.0.2",
-    "https-proxy-agent": "^5.0.0"
+    "world-atlas": "^2.0.2"
+  },
+  "dependencies": {
+    "util": "^0.12.4"
   }
 }

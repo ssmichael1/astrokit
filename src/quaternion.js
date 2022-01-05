@@ -27,8 +27,9 @@
  */
 
 
-if (inspect == undefined)
+if (inspect == undefined) {
     var inspect = Symbol.for('nodejs.util.inspect.custom');
+}
 
 
 export default class Quaternion {
@@ -252,7 +253,7 @@ export default class Quaternion {
         return `Quaternion: (Axis = [${this.axis()}], ` +
             `Angle = ${this.angle().toFixed(3)} rad)`
     }
-    [inspect]() {
+    [inspect](depth, opts) {
         return this.toString();
     }
 
