@@ -44,6 +44,10 @@
             background-color: #eeeeee;
         }
 
+        .sathistline {
+            stroke: #e75480;
+        }
+
         .gndcolumn:hover {
             background-color: green;
         }
@@ -162,15 +166,25 @@
             clear: both;
             height: 0;
         }
+
+        .axis {
+            font: 14px sans-serif;
+        }
+
+        .axis-grid line {
+            stroke: #def;
+        }
     </style>
 
-    <link rel="stylesheet" href="/js/jquery-ui-dist/jquery-ui.min.css">
+    <link rel="stylesheet" type="text/css" href="/js/jquery-ui-dist/jquery-ui.min.css">
+    <link rel="stylesheet" type="text/css" href="/js/datatables/media/css/jquery.dataTables.min.css">
     <script src="astrojs/astrokit.min.js"></script>
     <script src="js/d3/dist/d3.min.js"></script>
     <script src="js/d3-geo/dist/d3-geo.min.js"></script>
     <script src="js/topojson-client/dist/topojson-client.min.js"></script>
     <script src="js/jquery/dist/jquery.min.js"></script>
     <script src="js/jquery-ui-dist/jquery-ui.min.js"></script>
+    <script src="js/datatables/media/js/jquery.dataTables.min.js"></script>
 </head>
 
 <body>
@@ -238,7 +252,7 @@
 
         </div>
 
-        <div class="tlebox">
+        <div class="tlebox" style="background-color: #eeeeee;">
             <div style="text-align: left;font-size: 16px;">
                 <h3>Ground Station Contacts Over Previous 24 Hours</h3>
             </div>
@@ -256,13 +270,15 @@
                 </div>
             </div>
 
-            <div id="gndcontactlist"></div>
-
-        </div>
-
-
-    </div>
-    </div>
+            <div style="display: block;width: 100%;height: 100%;overflow: hidden;padding-top: 30px;">
+                <div style="width: 450px;height: 100%;float: left;">
+                    <div id="gndcontactlist"></div>
+                </div>
+                <div style="float: none;overflow: hidden;padding-left: 40px;">
+                    <div id="gndplot"></div>
+                    <div id="gndazplot"></div>
+                </div>
+            </div>
 
 
 </body>
@@ -470,6 +486,75 @@
 
     }
 
+    const plot_contact = (contact) => {
+        let profile = contact.profile
+        let margin = { top: 20, right: 20, bottom: 50, left: 70 },
+            width = 560 - margin.left - margin.right,
+            height = 300 - margin.top - margin.bottom;
+
+        let x = d3.scaleTime()
+            .range([0, width])
+            .domain([contact.starttime, contact.stoptime])
+        let y = d3.scaleLinear()
+            .range([height, 0])
+            .domain([5, contact.maxelevation + (5 - (contact.maxelevation % 5))])
+        let elevation_line = d3.line()
+            .x(d => x(d.time))
+            .y(d => y(d.elevation))
+
+        var svg = d3.select("#gndplot").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .attr("id", "contactplotarea")
+            .style('border', 'black solid 2px')
+            .style('background-color', 'white')
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        svg.append('g')
+            .attr('class', 'axis')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(x))
+
+        // Y axis ticks
+        svg.append('g')
+            .attr('class', 'y axis-grid')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(x).tickSize(-height).tickFormat(''))
+
+        svg.append('g')
+            .attr('class', 'x axis-grid')
+            .call(d3.axisLeft(y).tickSize(-width).tickFormat(''))
+
+        svg.append('g')
+            .attr('class', 'axis')
+            .call(d3.axisLeft(y))
+        svg.append('path')
+            .attr('class', 'line')
+            .style('stroke', 'black')
+            .style('stroke-width', 2)
+            .style('fill', 'none')
+            .attr('d', elevation_line(profile))
+        svg.append("text")
+            .attr("transform",
+                "translate(" + (width / 2) + " ," +
+                (height + margin.top + 20) + ")")
+            .style("text-anchor", "middle")
+            .style('font-size', '14px')
+            .text("Time");
+        // text label for the y axis
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -60)
+            .attr("x", 0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("Elevation (degrees)");
+
+    }
+
     const update_gndcontacts = () => {
         let latsign = 'N';
         if (gndcontacts.gndloc.lat < 0) {
@@ -489,24 +574,6 @@
             0)
 
         let q = gnditrf.qENU2ITRF().conjugate()
-
-        // Compute East-North-Up position from ground station
-        /*
-        let enu = satpos.map(p => {
-            let itrf_diff = [0, 0, 0]
-            itrf_diff[0] = p.itrf.raw[0] - gnditrf.raw[0]
-            itrf_diff[1] = p.itrf.raw[1] - gnditrf.raw[1]
-            itrf_diff[2] = p.itrf.raw[2] - gnditrf.raw[2]
-            let enu_diff = q.rotate(itrf_diff)
-            return {
-                time: p.time,
-                enu: enu_diff,
-                elevation: Math.asin(enu_diff[2] /
-                    Math.sqrt(enu_diff[0] ** 2 + enu_diff[1] ** 2)) * 180.0 / Math.PI,
-                azimuth: Math.atan2(enu_diff[1], enu_diff[0]) * 180.0 / Math.PI
-            }
-        })
-        */
         let now = new Date(Date.now())
         let enu = [...Array(86400).keys()].map(x => {
             let t = new Date(now - 86400 * 1000 + x * 1000)
@@ -538,6 +605,7 @@
                 return -1
             })
             .filter(v => { return (v > 0) })
+        // discontinuities in indices where above minimum elevation
         let breaks = idx
             .slice(1).map((v, index) => { return v - idx[index] })
             .map((v, index) => {
@@ -580,24 +648,51 @@
                 `${zeroPad(v.getUTCSeconds(), 2)}`
         }
 
-        let content = passes.reduce((c, v) => {
-            c += `<div class="gndrow">`
-            c += `<div class="gndcolumn">${toUTCTime(v.starttime)}</div>`
-            c += `<div class="gndcolumn">${toUTCTime(v.stoptime)}</div>`
-            c += `<div class="gndcolumn">${v.duration_seconds}</div>`
-            c += `<div class="gndcolumn">${v.maxelevation.toFixed(2)}\xB0</div>`
-            c += `</div>`
-            return c
-        }, '<div>') + '</div>'
-        content = '<div class="gndrow">' +
-            '<div class="gndheadcolumn">UTC Start</div>' +
-            '<div class="gndheadcolumn">UTC Stop</div>' +
-            '<div class="gndheadcolumn">Duration (sec)</div>' +
-            '<div class="gndheadcolumn">Max Elevation</div>' +
-            '</div>' + content
-        $('#gndcontactlist').html(content)
-        console.log(content)
+        let content =
+            '<table id="gndcontacttable" class="stripe" style="width: 50%;">' +
+            '<thead>' +
+            '<tr><th colspan="5">Ground Station Contacts</th></tr>' + '<tr><th>Number</th><th>UTC Start</th><th>UTC Stop</th>' +
+            '<th>Duration (sec)</th><th>Max Elevation</th></tr></thead>' +
+            '<tbody>'
 
+        let rownum = 0
+        content = passes.reduce((c, v) => {
+            c += '<tr>'
+            c += `<td>${rownum}</td>`
+            c += `<td>${toUTCTime(v.starttime)}</td>`
+            c += `<td>${toUTCTime(v.stoptime)}</td>`
+            c += `<td>${v.duration_seconds}</td>`
+            c += `<td>${v.maxelevation.toFixed(2)}\xB0</td>`
+            c += `</tr>`
+            rownum = rownum + 1
+            return c
+        }, content)
+        content += '</tbody></table>'
+        $('#gndcontactlist').html(content)
+
+        // Make the ground contents a data table
+        let table = $('#gndcontacttable').DataTable(
+            {
+                bFilter: false,
+                paging: false
+            }
+        )
+        $('#gndcontacttable tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+
+            }
+            else {
+                d3.selectAll('#contactplotarea').remove()
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                plot_contact(passes[table.row(this).index()])
+            }
+        });
+
+        $('#button').click(function () {
+            table.row('.selected').remove().draw(false);
+        });
 
     }
 
@@ -614,8 +709,8 @@
                     };
                     update_gndcontacts()
                 }
-
             })
+
     })
 
     function startup() {
