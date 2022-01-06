@@ -26,6 +26,33 @@
             padding-bottom: 10px;
         }
 
+        .gndrow {
+            display: flex;
+            padding-bottom: 0px;
+        }
+
+        .gndheadcolumn,
+        .gndcolumn {
+            font-size: 14px;
+            font-weight: normal;
+            text-align: center;
+            width: 120px;
+            padding-right: 4px;
+            border: 1px solid black;
+            padding-bottom: 4px;
+            padding-top: 2px;
+            background-color: #eeeeee;
+        }
+
+        .gndcolumn:hover {
+            background-color: green;
+        }
+
+        .gndheadcolumn {
+            font-weight: bold;
+            background-color: lightgray;
+        }
+
         .lcolumn,
         .rcolumn {
             font-size: 14px;
@@ -260,6 +287,7 @@
 
     var countries = null
     var satnames = null
+    const zeroPad = (num, places) => String(num).padStart(places, '0')
 
     function draw_gndplot() {
 
@@ -349,7 +377,6 @@
         }
 
         // Update the text
-        const zeroPad = (num, places) => String(num).padStart(places, '0')
         document.getElementById("iss_time").innerHTML =
             `${zeroPad(now.getUTCHours(), 2)
             }:${zeroPad(now.getUTCMinutes(), 2)}:${zeroPad(now.getUTCSeconds(), 2)} `
@@ -525,13 +552,51 @@
         let passes = breaks
             .slice(1, breaks.length)
             .map((b, index) => {
+                let startidx = idx[breaks[index] + 1]
+                let endidx = idx[breaks[index + 1]]
+                let profile = enu.filter((v, index) => {
+                    if ((index > startidx) && (index <= endidx)) {
+                        return true
+                    }
+                    return false
+                })
+                let maxelevation = profile.reduce((p, v) => {
+                    if (v.elevation > p)
+                        return v.elevation
+                    return p
+                }, -90)
                 return {
-                    starttime: enu[idx[breaks[index] + 1]].time,
-                    stoptime: enu[idx[breaks[index + 1]]].time
+                    starttime: enu[startidx].time,
+                    stoptime: enu[endidx].time,
+                    profile: profile,
+                    maxelevation: maxelevation,
+                    duration_seconds: (enu[endidx].time - enu[startidx].time) * 1.0e-3
                 }
             })
-        console.log(passes)
 
+        const toUTCTime = (v) => {
+            return `${zeroPad(v.getUTCHours(), 2)}:` +
+                `${zeroPad(v.getUTCMinutes(), 2)}:` +
+                `${zeroPad(v.getUTCSeconds(), 2)}`
+        }
+
+        let content = passes.reduce((c, v) => {
+            c += `<div class="gndrow">`
+            c += `<div class="gndcolumn">${toUTCTime(v.starttime)}</div>`
+            c += `<div class="gndcolumn">${toUTCTime(v.stoptime)}</div>`
+            c += `<div class="gndcolumn">${v.duration_seconds}</div>`
+            c += `<div class="gndcolumn">${v.maxelevation.toFixed(2)}\xB0</div>`
+            c += `</div>`
+            return c
+        }, '<div>') + '</div>'
+        content = '<div class="gndrow">' +
+            '<div class="gndheadcolumn">UTC Start</div>' +
+            '<div class="gndheadcolumn">UTC Stop</div>' +
+            '<div class="gndheadcolumn">Duration (sec)</div>' +
+            '<div class="gndheadcolumn">Max Elevation</div>' +
+            '</div>' + content
+        $('#gndcontactlist').html(content)
+        console.log(content)
 
 
     }
