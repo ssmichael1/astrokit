@@ -3,7 +3,7 @@
 <html>
 
 <head>
-    <title>AstroKit Examples</title>
+    <title>Satellite Ground Track</title>
     <meta name="author" content="Steven Michael">
 
     <style>
@@ -21,18 +21,71 @@
             stroke-width: 0.75;
         }
 
+        .row {
+            display: flex;
+            padding-bottom: 10px;
+        }
+
+        .gndrow {
+            display: flex;
+            padding-bottom: 0px;
+        }
+
+        .gndheadcolumn,
+        .gndcolumn {
+            font-size: 14px;
+            font-weight: normal;
+            text-align: center;
+            width: 120px;
+            padding-right: 4px;
+            border: 1px solid black;
+            padding-bottom: 4px;
+            padding-top: 2px;
+            background-color: #eeeeee;
+        }
+
+        .sathistline {
+            stroke: #e75480;
+        }
+
+        .gndcolumn:hover {
+            background-color: green;
+        }
+
+        .gndheadcolumn {
+            font-weight: bold;
+            background-color: lightgray;
+        }
+
+        .lcolumn,
+        .rcolumn {
+            font-size: 14px;
+        }
+
+        .lcolumn {
+            text-align: left;
+            padding-left: 4px;
+        }
+
+        .rcolumn {
+            text-align: right;
+            padding-right: 4px;
+            width: 15%;
+        }
+
+
         .tlebox {
             border: 2px solid black;
             font-size: 12px;
-            width: 80%;
-            margin: auto;
+            width: 100%;
             margin-top: 10px;
             margin-bottom: 10px;
-            background-color: #ffe2e6;
+            background-color: #EEEEEE;
             text-align: left;
             padding-left: 10px;
             padding-top: 10px;
             padding-bottom: 10px;
+            align-items: center;
         }
 
         .mapbox {
@@ -56,11 +109,13 @@
             padding: 20px;
             padding-right: 30px;
             width: 92%;
+            margin: auto;
             border: solid 2px black;
             text-align: center;
             font-family: Sans-Serif;
             font-weight: bold;
             align-items: center;
+            margin-bottom: 20px;
         }
 
         .graticule {
@@ -111,29 +166,48 @@
             clear: both;
             height: 0;
         }
+
+        .axis {
+            font: 14px sans-serif;
+        }
+
+        .axis-grid line {
+            stroke: #def;
+        }
     </style>
 
+    <link rel="stylesheet" type="text/css" href="/js/jquery-ui-dist/jquery-ui.min.css">
+    <link rel="stylesheet" type="text/css" href="/js/datatables/media/css/jquery.dataTables.min.css">
+    <script src="astrojs/astrokit.min.js"></script>
+    <script src="js/d3/dist/d3.min.js"></script>
+    <script src="js/d3-geo/dist/d3-geo.min.js"></script>
+    <script src="js/topojson-client/dist/topojson-client.min.js"></script>
+    <script src="js/jquery/dist/jquery.min.js"></script>
+    <script src="js/jquery-ui-dist/jquery-ui.min.js"></script>
+    <script src="js/datatables/media/js/jquery.dataTables.min.js"></script>
 </head>
 
-<script src="astrojs/astrokit.min.js"></script>
-<script src="js/d3/dist/d3.min.js"></script>
-<script src="js/d3-geo/dist/d3-geo.min.js"></script>
-<script src="js/topojson-client/dist/topojson-client.min.js"></script>
-
 <body>
-    <div class="topbox" style="border-radius: 12px;">
-        <!-- ISS Groud Plot -->
-        <div>AstroKit Examples</div>
+    <!--
+    <div class="topbox" style="border-radius: 12px;">        
+    <div>AstroKit Examples</div>
     </div>
+    -->
     <br>
     <div class="topbox">
-        <!-- ISS Groud Plot -->
-        <div>International Space Station Ground Track from Two-Line Element Set</div>
-        <div class="tlebox" id="isstle">asdfad</div>
-        <div class="tlebox" id="isspos">
+        <!-- Ground Plot -->
+
+        <!-- Satellite selection & Location -->
+        <div class="tlebox">
+            <div class="ui-widget">
+                <label for="satselection">Satellite: </label>
+                <input id="satselection" style="width: 200px;">
+            </div>
+            <div style="padding-bottom: 20px;"></div>
+
             <div class="rTable">
                 <div class="rTableRow">
-                    <div class="rTableHead">Time</div>
+                    <div class="rTableHead">UTC Time</div>
                     <div class="rTableHead">Latitude</div>
                     <div class="rTableHead">Longitude</div>
                     <div class="rTableHead">Altitude</div>
@@ -149,26 +223,81 @@
             </div>
         </div>
 
-
-        <div style="margin: 4px;border: solid 2px black;width: 100%;">
+        <!-- The Map -->
+        <div style="margin: 0px;border: solid 2px black;width: 100%;margin-bottom: 20px;margin-top: 20px;">
             <div id="issmap" style="width: 100%;"></div>
         </div>
-        <div style="margin: 4px;border: solid 2px black;width: 100%;">
-            <div id="issmap2" style="width: 100%;"></div>
+
+        <div class="tlebox" style="text-align: center;margin: auto;">
+            <div style="text-align: left;">
+                <h2>Two-Line Element Set (TLE)</h2>
+            </div>
+            <div id="isstle" style="padding-bottom: 20px;text-align: left;font-family: monospace;"></div>
+            <div class="rTable" style="margin: auto;">
+                <div class="rTableRow">
+                    <div class="rTableHead" style="width: 10%;">Epoch</div>
+                    <div class="rTableHead" style="width: 10%;">Inclination</div>
+                    <div class="rTableHead" style="width: 10%;">Eccentricity</div>
+                    <div class="rTableHead" style="width: 10%;">RAAN</div>
+                    <div class="rTableHead" style="width: 10%;">Arg of Perigee</div>
+                    <div class="rTableHead" style="width: 10%;">Mean Motion</div>
+                    <div class="rTableHead" style="width: 10%;">Mean Anomaly</div>
+                </div>
+                <div class="rTableRow">
+                    <div class="rTableCell" id="epoch" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="inclination" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="eccentricity" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="raan" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="arg_of_perigee" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="mean_motion" style="width: 10%;height: 24px;"></div>
+                    <div class="rTableCell" id="mean_anomaly" style="width: 10%;height: 24px;"></div>
+                </div>
+            </div>
+
         </div>
-    </div>
+
+        <div class="tlebox" style="background-color: #eeeeee;">
+            <div style="text-align: left;font-size: 16px;">
+                <h3>Ground Station Contacts Over Next 24 Hours</h3>
+            </div>
+
+            <div style="align-items: left;">
+                <div class="row">
+                    <div class="rcolumn">Ground Station:</div>
+                    <div class="lcolumn">
+                        <input id="gndstationloc" style="width: 400px;">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="rcolumn">Geodetic Position:</div>
+                    <div class="lcolumn" id="gndlatlon"></div>
+                </div>
+            </div>
+
+            <div style="display: block;width: 100%;height: 100%;overflow: hidden;padding-top: 30px;">
+                <div style="width: 450px;height: 100%;float: left;">
+                    <div id="gndcontactlist"></div>
+                </div>
+                <div style="float: none;overflow: hidden;padding-left: 40px;height: 650px;">
+                    <div id="contactelevationplot" style="padding-bottom: 20px;"></div>
+                    <div id="contactazimuthplot"></div>
+                </div>
+            </div>
+
+
 </body>
 
 <script>
     var width = d3.select("#issmap").node().getBoundingClientRect().width
     var height = width / 2.0
-    var iss_tlelines = null
-    var iss_tle = null
-    var iss_gndpos = null
+    var tlelines = null
+    var tle = null
+    var satpos = null
     var svg_handles = {
         path: null,
         projection: null
     }
+    var gndcontacts = {}
 
     var svg = d3.select("#issmap").append("svg")
         .attr("width", width)
@@ -176,9 +305,11 @@
         .attr("class", "earth")
         .attr("border", 1)
 
-    var countries;
+    var countries = null
+    var satnames = null
+    const zeroPad = (num, places) => String(num).padStart(places, '0')
 
-    function draw_iss_gndplot() {
+    function draw_gndplot() {
 
         let g = d3.select('svg g');
         if (g) g.remove();
@@ -233,7 +364,7 @@
 
     function timeout() {
         compute_groundtrack()
-        let curpos = iss_gndpos[0];
+        let curpos = satpos[0];
         let now = curpos.time
         let rv = curpos.rv
 
@@ -256,17 +387,16 @@
         // Take vector norm to get speed in meters / second
         gndspd = Math.sqrt(gndspd[0] ** 2 + gndspd[1] ** 2 + gndspd[2] ** 2)
 
-        let latsign = 'E';
+        let latsign = 'N';
         if (curpos.latitude_deg < 0) {
-            latsign = 'W'
+            latsign = 'S'
         }
-        let lonsign = 'N'
+        let lonsign = 'E'
         if (curpos.longitude_deg < 0) {
-            lonsign = 'S'
+            lonsign = 'W'
         }
 
         // Update the text
-        const zeroPad = (num, places) => String(num).padStart(places, '0')
         document.getElementById("iss_time").innerHTML =
             `${zeroPad(now.getUTCHours(), 2)
             }:${zeroPad(now.getUTCMinutes(), 2)}:${zeroPad(now.getUTCSeconds(), 2)} `
@@ -278,12 +408,6 @@
             `${(curpos.itrf.height() / 1.0e3).toFixed(1)} km`
         document.getElementById("iss_gndspd").innerHTML =
             `${(gndspd / 1.0e3).toFixed(3)} km / s`
-
-
-
-
-
-
 
         // Update satellite position
         let iconpos = svg_handles.projection([curpos.longitude_deg, curpos.latitude_deg])
@@ -326,7 +450,7 @@
             "type": "Feature",
             "geometry": {
                 "type": "LineString",
-                "coordinates": iss_gndpos.map(x => [x.longitude_deg, x.latitude_deg])
+                "coordinates": satpos.map(x => [x.longitude_deg, x.latitude_deg])
             }
         }
         d3.selectAll('.sathistline').remove()
@@ -336,10 +460,274 @@
             .attr("class", "sathistline")
             .attr('fill-opacity', 0)
             .attr('stroke', '#e75480')
-            .attr("stroke-width", 1.5)
+            .attr("stroke-width", 2)
             .attr("d", svg_handles.path)
 
     }
+
+    function onSatChanged(event, ui) {
+        let satname = $('#satselection').val()
+        d3.json('/sattle/' + satname).then(data => {
+            if (data.length != 3) {
+                console.log('invalid tle')
+                return
+            }
+            tlelines = data
+            tle = new ak.TLE(tlelines)
+            document.getElementById("isstle").innerHTML =
+                tlelines[0] + "<br>" + tlelines[1] + "<br>" + tlelines[2]
+            $('#inclination').text(`${tle.inclination.toFixed(3)}\xB0`)
+            $('#mean_motion').text(`${tle.mean_motion.toFixed(3)} rev/day`)
+            $('#eccentricity').text(`${tle.eccen}`)
+            $('#raan').text(`${tle.raan.toFixed(3)}\xB0`)
+            $('#arg_of_perigee').text(`${tle.arg_of_perigee.toFixed(3)}\xB0`)
+            $('#mean_anomaly').text(`${tle.mean_anomaly.toFixed(3)}\xB0`)
+            $('#epoch').text(tle.epoch)
+            compute_groundtrack()
+            draw_gndplot()
+            timeout()
+        })
+
+    }
+
+    const plot_contact = (contact, id, fieldname, ydomain, ylabel) => {
+        let profile = contact.profile
+        let margin = { top: 20, right: 20, bottom: 50, left: 70 },
+            width = 560 - margin.left - margin.right,
+            height = 300 - margin.top - margin.bottom;
+
+        let x = d3.scaleTime()
+            .range([0, width])
+            .domain([contact.starttime, contact.stoptime])
+        let y = d3.scaleLinear()
+            .range([height, 0])
+            .domain(ydomain)
+        let elevation_line = d3.line()
+            .x(d => x(d.time))
+            .y(d => y(d[fieldname]))
+
+        var svg = d3.select(`#${id}`).append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .attr("id", `${id}_svg`)
+            .style('border', 'black solid 2px')
+            .style('background-color', 'white')
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        svg.append('g')
+            .attr('class', 'axis')
+            .attr('transform', `translate(0, ${height})`)
+            .call(d3.axisBottom(x))
+
+        // Y axis ticks
+        svg.append('g')
+            .attr('class', 'y axis-grid')
+            .attr('transform', `translate(0, ${height})`)
+            .call(d3.axisBottom(x).tickSize(-height).tickFormat(''))
+
+        svg.append('g')
+            .attr('class', 'x axis-grid')
+            .call(d3.axisLeft(y).tickSize(-width).tickFormat(''))
+
+        svg.append('g')
+            .attr('class', 'axis')
+            .call(d3.axisLeft(y))
+        svg.append('path')
+            .attr('class', 'line')
+            .style('stroke', 'black')
+            .style('stroke-width', 2)
+            .style('fill', 'none')
+            .attr('d', elevation_line(profile))
+        svg.append("text")
+            .attr("transform",
+                "translate(" + (width / 2) + " ," +
+                (height + margin.top + 20) + ")")
+            .style("text-anchor", "middle")
+            .style('font-size', '14px')
+            .text("Time");
+        // text label for the y axis
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -60)
+            .attr("x", 0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text(ylabel);
+
+    }
+
+    const update_gndcontacts = () => {
+        let latsign = 'N';
+        if (gndcontacts.gndloc.lat < 0) {
+            latsign = 'S'
+        }
+        let lngsign = 'E'
+        if (gndcontacts.gndloc.lng < 0) {
+            lngsign = 'W'
+        }
+        $('#gndlatlon').text(
+            `${Math.abs(gndcontacts.gndloc.lat.toFixed(3))}\xB0 ${latsign}, ` +
+            `${Math.abs(gndcontacts.gndloc.lng.toFixed(3))}\xB0 ${lngsign}`
+        )
+
+        let gnditrf = ak.ITRFCoord.fromGeodetic(gndcontacts.gndloc.lat * Math.PI / 180.0,
+            gndcontacts.gndloc.lng * Math.PI / 180.0,
+            0)
+
+        let q = gnditrf.qENU2ITRF().conjugate()
+        let now = new Date(Date.now())
+        let enu = [...Array(86400).keys()].map(x => {
+            let t = new Date(now.valueOf() + x * 1000)
+            let qteme2itrf = ak.qTEME2ITRF(t)
+            let rv = ak.sgp4(tle, t)
+            let p = qteme2itrf.rotate(rv.r)
+            let itrf_diff = [0, 0, 0]
+            itrf_diff[0] = p[0] - gnditrf.raw[0]
+            itrf_diff[1] = p[1] - gnditrf.raw[1]
+            itrf_diff[2] = p[2] - gnditrf.raw[2]
+            let enu_diff = q.rotate(itrf_diff)
+            return {
+                time: t,
+                enu: enu_diff,
+                elevation: Math.asin(enu_diff[2] /
+                    Math.sqrt(enu_diff[0] ** 2 + enu_diff[1] ** 2 + enu_diff[2] ** 2)) * 180.0 / Math.PI,
+                azimuth: Math.atan2(enu_diff[1], enu_diff[0]) * 180.0 / Math.PI
+            }
+
+        })
+
+        const minelevation = 5
+        // Get indices where we are above minimum elevation
+        let idx = enu
+            .map((v, index) => {
+                if (v.elevation > minelevation) {
+                    return index
+                }
+                return -1
+            })
+            .filter(v => { return (v > 0) })
+        // discontinuities in indices where above minimum elevation
+        let breaks = idx
+            .slice(1).map((v, index) => { return v - idx[index] })
+            .map((v, index) => {
+                if (v > 1) {
+                    return index;
+                }
+                return -1;
+            })
+            .filter(v => { return v > 0 })
+
+        breaks.unshift(-1)
+        let passes = breaks
+            .slice(1, breaks.length)
+            .map((b, index) => {
+                let startidx = idx[breaks[index] + 1]
+                let endidx = idx[breaks[index + 1]]
+                let profile = enu.filter((v, index) => {
+                    if ((index > startidx) && (index <= endidx)) {
+                        return true
+                    }
+                    return false
+                })
+                let maxelevation = profile.reduce((p, v) => {
+                    if (v.elevation > p)
+                        return v.elevation
+                    return p
+                }, -90)
+                return {
+                    starttime: enu[startidx].time,
+                    stoptime: enu[endidx].time,
+                    profile: profile,
+                    maxelevation: maxelevation,
+                    duration_seconds: (enu[endidx].time - enu[startidx].time) * 1.0e-3
+                }
+            })
+
+        const toUTCTime = (v) => {
+            return `${zeroPad(v.getUTCHours(), 2)
+                }:` +
+                `${zeroPad(v.getUTCMinutes(), 2)}: ` +
+                `${zeroPad(v.getUTCSeconds(), 2)} `
+        }
+
+        let content =
+            '<table id="gndcontacttable" class="stripe" style="width: 100%;">' +
+            '<thead>' +
+            '<tr><th colspan="5">Ground Station Contacts</th></tr>' + '<tr><th>Number</th><th>UTC Start</th><th>UTC Stop</th>' +
+            '<th>Duration (sec)</th><th>Max Elevation</th></tr></thead>' +
+            '<tbody>'
+
+        let rownum = 0
+        content = passes.reduce((c, v) => {
+            c += '<tr>'
+            c += `<td>${rownum}</td > `
+            c += `<td>${toUTCTime(v.starttime)}</td>`
+            c += `<td>${toUTCTime(v.stoptime)}</td> `
+            c += `<td>${v.duration_seconds}</td> `
+            c += `<td>${v.maxelevation.toFixed(2)}\xB0</td > `
+            c += `</tr>`
+            rownum = rownum + 1
+            return c
+        }, content)
+        content += '</tbody></table>'
+        $('#gndcontactlist').html(content)
+
+        // Make the ground contents a data table
+        let table = $('#gndcontacttable').DataTable(
+            {
+                bFilter: false,
+                paging: false
+            }
+        )
+        $('#gndcontacttable tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+                d3.selectAll('#contactelevationplot_svg').remove()
+                d3.selectAll('#contactazimuthplot_svg').remove()
+            }
+            else {
+                d3.selectAll('#contactelevationplot_svg').remove()
+                d3.selectAll('#contactazimuthplot_svg').remove()
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                let pass = passes[table.row(this).index()]
+                let ydomain = [5, pass.maxelevation + 5 - (pass.maxelevation % 5)]
+                plot_contact(pass, 'contactelevationplot', 'elevation', ydomain,
+                    'Elevation from Ground(deg)')
+                plot_contact(pass, 'contactazimuthplot', 'azimuth', [-180, 180], 'Ground Azimuth (deg)')
+            }
+        });
+        // Select 1st row, if there are more than 0
+        if (table.rows()[0].length > 0) {
+            console.log(table.row(0))
+            console.log(table.$('tr.first'))
+        }
+
+        $('#button').click(function () {
+            table.row('.selected').remove().draw(false);
+        });
+
+    }
+
+    $('#gndstationloc').change(() => {
+        d3.json('/location/' + $('#gndstationloc').val())
+            .then((data) => {
+                gndcontacts = {};
+                if (data.hasOwnProperty('lat')) {
+                    gndcontacts = {
+                        gndloc: {
+                            lat: data.lat,
+                            lng: data.lng,
+                        }
+                    };
+                    update_gndcontacts()
+                }
+            })
+
+    })
 
     function startup() {
 
@@ -347,36 +735,49 @@
         d3.json("js/world-atlas/countries-110m.json")
             .then(function (topology) {
                 countries = topojson.feature(topology, topology.objects.countries)
-                //d3.text("https://www.celestrak.com/NORAD/elements/stations.txt")
+                //d3.text("https://www.celestrak.com/NORAD/elements/stations.txt")                    
 
-                const tleurl = '/iss_tle'
-                d3.text(tleurl)
+                setInterval(timeout, 1000)
+                width = d3.select("#issmap").node().getBoundingClientRect().width
+
+                // Handle resize
+                window.onresize = function () {
+                    width = d3.select("#issmap").node().getBoundingClientRect().width
+                    height = width / 2.0
+                    draw_gndplot()
+                    timeout()
+
+
+                }
+                d3.json('/satnames')
                     .then(data => {
+                        satnames = data
+                        $('#satselection')
+                            .autocomplete({
+                                source: function (request, response) {
+                                    var results = $.ui.autocomplete.filter(satnames, request.term);
 
-                        iss_tlelines = JSON.parse(data)
-                        iss_tle = new ak.TLE(iss_tlelines)
-                        document.getElementById("isstle").innerHTML =
-                            iss_tlelines[0] + "<br>" + iss_tlelines[1] + "<br>" + iss_tlelines[2]
-                        compute_groundtrack()
-                        draw_iss_gndplot()
-                        timeout()
+                                    response(results.slice(0, 40));
+                                },
+                                delay: 300,
+                                select: onSatChanged
+                            }
+                            )
                     })
+
+                $('#satselection').val('TROPICS PATHFINDER')
+                onSatChanged()
+
+                $('#gndstationloc').val('{ "lat": 77.875, "lng": 20.975 }')
+                $('#gndstationloc').trigger('change')
+
             })
-        setInterval(timeout, 1000)
-        width = d3.select("#issmap").node().getBoundingClientRect().width
-
-        // Handle resize
-        window.onresize = function () {
-            width = d3.select("#issmap").node().getBoundingClientRect().width
-            height = width / 2.0
-            draw_iss_gndplot()
-            timeout()
-
-
-        }
 
     }
     startup()
+
+
+
 
 </script>
 
@@ -384,13 +785,20 @@
 <script>
     function compute_groundtrack() {
         // Equal to 1 revolution (mean motion is revs / day)
-        let rate = Math.PI * 2 / 86400 * iss_tle.mean_motion
+        let rate = Math.PI * 2 / 86400 * tle.mean_motion
         // Plot one revolution in Earth-fixed frame, by subtracting off
         // inclination-weighted Earth rate
-        rate = rate - ak.univ.omega_earth * Math.cos(iss_tle.inclination * Math.PI / 180)
+        rate = rate - ak.univ.omega_earth
+        //rate = rate - ak.univ.omega_earth * Math.sin(iss_tle.inclination * Math.PI / 180)
         // Duration is in seconds (86400 seconds / day)
         // Get duration for 1 revolution (2 pi radians)
         let duration = 2 * Math.PI / rate
+        if (duration < 0) {
+            duration = 86400
+        }
+        if (duration > 86400) {
+            duration = 86400
+        }
 
 
         // Create array of times for which to compute positions
@@ -402,11 +810,11 @@
             .map(x => new Date(now - x * dt * 1000))
 
         // Get the ground position for each time
-        iss_gndpos = times.map((t) => {
+        satpos = times.map((t) => {
             // Get the position and velocity in the TEME coordinate frame
             // by running "sgp4" orbit propagator with iss TLE and
             // desired time as input
-            let rv = ak.sgp4(iss_tle, t)
+            let rv = ak.sgp4(tle, t)
 
             // Get quaternion to rotate from TEME frame to ITRF frame
             // TEME = Earth-centered pseudo-inertial frame in which sgp4

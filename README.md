@@ -173,12 +173,27 @@ Example usage is below.  This is a javascript module, with exported name <tt>ak<
 </body>
 ```
 
+## **Example Satellite Tracker**
+
+The distribution includes an example web application that can be run against the local version of the code.  The application shows the ground track of active satellites with ephemeris downloaded from http://www.celestrak.org/.  The application will also show and plot ground station contact times for the chosen satellite and a user-chosen ground station location.  With a NodeJS that supports ES6 installed, run,
+
+```
+cd examples/web
+npm install
+node ./App.js
+```
+
+
+![Satellite Track](images/sattrack.png)
+<br>
+![Ground Contact List](images/gndtrack.png)
+
 ## **License**
 
 <tt>
-Copyright 2021 Steven Michael (ssmichael@gmail.com)
+Copyright 2022 Steven Michael (ssmichael@gmail.com)
 
 Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE
 </tt>
