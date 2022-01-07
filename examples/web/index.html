@@ -80,7 +80,7 @@
             width: 100%;
             margin-top: 10px;
             margin-bottom: 10px;
-            background-color: #ffe2e6;
+            background-color: #EEEEEE;
             text-align: left;
             padding-left: 10px;
             padding-top: 10px;
@@ -196,9 +196,8 @@
     <br>
     <div class="topbox">
         <!-- Ground Plot -->
-        <div style="margin: 4px;border: solid 2px black;width: 100%;">
-            <div id="issmap" style="width: 100%;"></div>
-        </div>
+
+        <!-- Satellite selection & Location -->
         <div class="tlebox">
             <div class="ui-widget">
                 <label for="satselection">Satellite: </label>
@@ -224,9 +223,14 @@
             </div>
         </div>
 
+        <!-- The Map -->
+        <div style="margin: 0px;border: solid 2px black;width: 100%;margin-bottom: 20px;margin-top: 20px;">
+            <div id="issmap" style="width: 100%;"></div>
+        </div>
+
         <div class="tlebox" style="text-align: center;margin: auto;">
             <div style="text-align: left;">
-                <h3>Orbital Elements</h3>
+                <h2>Two-Line Element Set (TLE)</h2>
             </div>
             <div id="isstle" style="padding-bottom: 20px;text-align: left;font-family: monospace;"></div>
             <div class="rTable" style="margin: auto;">
@@ -254,7 +258,7 @@
 
         <div class="tlebox" style="background-color: #eeeeee;">
             <div style="text-align: left;font-size: 16px;">
-                <h3>Ground Station Contacts Over Previous 24 Hours</h3>
+                <h3>Ground Station Contacts Over Next 24 Hours</h3>
             </div>
 
             <div style="align-items: left;">
@@ -274,9 +278,9 @@
                 <div style="width: 450px;height: 100%;float: left;">
                     <div id="gndcontactlist"></div>
                 </div>
-                <div style="float: none;overflow: hidden;padding-left: 40px;">
-                    <div id="gndplot"></div>
-                    <div id="gndazplot"></div>
+                <div style="float: none;overflow: hidden;padding-left: 40px;height: 650px;">
+                    <div id="contactelevationplot" style="padding-bottom: 20px;"></div>
+                    <div id="contactazimuthplot"></div>
                 </div>
             </div>
 
@@ -486,7 +490,7 @@
 
     }
 
-    const plot_contact = (contact) => {
+    const plot_contact = (contact, id, fieldname, ydomain, ylabel) => {
         let profile = contact.profile
         let margin = { top: 20, right: 20, bottom: 50, left: 70 },
             width = 560 - margin.left - margin.right,
@@ -497,15 +501,15 @@
             .domain([contact.starttime, contact.stoptime])
         let y = d3.scaleLinear()
             .range([height, 0])
-            .domain([5, contact.maxelevation + (5 - (contact.maxelevation % 5))])
+            .domain(ydomain)
         let elevation_line = d3.line()
             .x(d => x(d.time))
-            .y(d => y(d.elevation))
+            .y(d => y(d[fieldname]))
 
-        var svg = d3.select("#gndplot").append("svg")
+        var svg = d3.select(`#${id}`).append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-            .attr("id", "contactplotarea")
+            .attr("id", `${id}_svg`)
             .style('border', 'black solid 2px')
             .style('background-color', 'white')
             .append("g")
@@ -514,13 +518,13 @@
 
         svg.append('g')
             .attr('class', 'axis')
-            .attr('transform', `translate(0,${height})`)
+            .attr('transform', `translate(0, ${height})`)
             .call(d3.axisBottom(x))
 
         // Y axis ticks
         svg.append('g')
             .attr('class', 'y axis-grid')
-            .attr('transform', `translate(0,${height})`)
+            .attr('transform', `translate(0, ${height})`)
             .call(d3.axisBottom(x).tickSize(-height).tickFormat(''))
 
         svg.append('g')
@@ -551,7 +555,7 @@
             .attr("dy", "1em")
             .style("text-anchor", "middle")
             .style("font-size", "14px")
-            .text("Elevation (degrees)");
+            .text(ylabel);
 
     }
 
@@ -576,7 +580,7 @@
         let q = gnditrf.qENU2ITRF().conjugate()
         let now = new Date(Date.now())
         let enu = [...Array(86400).keys()].map(x => {
-            let t = new Date(now - 86400 * 1000 + x * 1000)
+            let t = new Date(now.valueOf() + x * 1000)
             let qteme2itrf = ak.qTEME2ITRF(t)
             let rv = ak.sgp4(tle, t)
             let p = qteme2itrf.rotate(rv.r)
@@ -643,13 +647,14 @@
             })
 
         const toUTCTime = (v) => {
-            return `${zeroPad(v.getUTCHours(), 2)}:` +
-                `${zeroPad(v.getUTCMinutes(), 2)}:` +
-                `${zeroPad(v.getUTCSeconds(), 2)}`
+            return `${zeroPad(v.getUTCHours(), 2)
+                }:` +
+                `${zeroPad(v.getUTCMinutes(), 2)}: ` +
+                `${zeroPad(v.getUTCSeconds(), 2)} `
         }
 
         let content =
-            '<table id="gndcontacttable" class="stripe" style="width: 50%;">' +
+            '<table id="gndcontacttable" class="stripe" style="width: 100%;">' +
             '<thead>' +
             '<tr><th colspan="5">Ground Station Contacts</th></tr>' + '<tr><th>Number</th><th>UTC Start</th><th>UTC Stop</th>' +
             '<th>Duration (sec)</th><th>Max Elevation</th></tr></thead>' +
@@ -658,11 +663,11 @@
         let rownum = 0
         content = passes.reduce((c, v) => {
             c += '<tr>'
-            c += `<td>${rownum}</td>`
+            c += `<td>${rownum}</td > `
             c += `<td>${toUTCTime(v.starttime)}</td>`
-            c += `<td>${toUTCTime(v.stoptime)}</td>`
-            c += `<td>${v.duration_seconds}</td>`
-            c += `<td>${v.maxelevation.toFixed(2)}\xB0</td>`
+            c += `<td>${toUTCTime(v.stoptime)}</td> `
+            c += `<td>${v.duration_seconds}</td> `
+            c += `<td>${v.maxelevation.toFixed(2)}\xB0</td > `
             c += `</tr>`
             rownum = rownum + 1
             return c
@@ -680,15 +685,26 @@
         $('#gndcontacttable tbody').on('click', 'tr', function () {
             if ($(this).hasClass('selected')) {
                 $(this).removeClass('selected');
-
+                d3.selectAll('#contactelevationplot_svg').remove()
+                d3.selectAll('#contactazimuthplot_svg').remove()
             }
             else {
-                d3.selectAll('#contactplotarea').remove()
+                d3.selectAll('#contactelevationplot_svg').remove()
+                d3.selectAll('#contactazimuthplot_svg').remove()
                 table.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');
-                plot_contact(passes[table.row(this).index()])
+                let pass = passes[table.row(this).index()]
+                let ydomain = [5, pass.maxelevation + 5 - (pass.maxelevation % 5)]
+                plot_contact(pass, 'contactelevationplot', 'elevation', ydomain,
+                    'Elevation from Ground(deg)')
+                plot_contact(pass, 'contactazimuthplot', 'azimuth', [-180, 180], 'Ground Azimuth (deg)')
             }
         });
+        // Select 1st row, if there are more than 0
+        if (table.rows()[0].length > 0) {
+            console.log(table.row(0))
+            console.log(table.$('tr.first'))
+        }
 
         $('#button').click(function () {
             table.row('.selected').remove().draw(false);
