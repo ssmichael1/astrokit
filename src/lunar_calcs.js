@@ -47,16 +47,22 @@ export const moonPhase = (thedate) => {
     return moon_phase
 }
 
+/**
+ * 
+ * @param {thedate} Date Object
+ * @param {coord} ITRFCoord object
+ * @returns JSON with moon rise and set times as javascript Dates
+ */
 export const moonRiseSet = (thedate, coord) => {
 
     let observer_longitude = coord.longitude()
-    let observer_latitude = coord.latitude()
+    let observer_latitude = coord.geocentric_latitude()
 
     // accurate to 10 seconds
     let tolerance = 10 / 86400
     let fields = ['rise', 'set']
 
-    return fields.map((v, riseidx) => {
+    let [hrise, hset] = fields.map((v, riseidx) => {
         let cnt = 0
         let JDtemp = thedate.jd()
         let deltaUT = .001
@@ -136,4 +142,10 @@ export const moonRiseSet = (thedate, coord) => {
         }
         return deltaJD * 24
     })
+    let dbase = new Date(Date.UTC(thedate.getUTCFullYear(),
+        thedate.getUTCMonth(), thedate.getUTCDate())).getTime()
+    return {
+        rise: new Date(dbase + hrise * 3600 * 1000),
+        set: new Date(dbase + hset * 3600 * 1000)
+    }
 }

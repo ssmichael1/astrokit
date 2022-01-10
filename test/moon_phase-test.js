@@ -22,8 +22,11 @@ tape('Moon Calculations Validation', (test) => {
 
     // Example 5-4 from Vallado
     // Aug 21 1998
-    d = new Date(Date.UTC(1998, 7, 21))
-    let riseset = moonRiseSet(d, ITRFCoord.fromGeodetic(40 * Math.PI / 180, 0, 0))
-    console.log(riseset)
+    d = new Date(Date.UTC(2022, 0, 10))
+    let riseset = moonRiseSet(d,
+        ITRFCoord.fromGeodetic(42.4154 * ak.deg2rad, -71.1565 * ak.deg2rad))
+    console.log(riseset.rise.toString())
+    console.log(riseset.set.toString())
+    console.log(([1, 2, 3]).normsq())
 })
 

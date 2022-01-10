@@ -73,7 +73,7 @@ Array.prototype.eadd = (other) => {
  * 
  * @returns Norm squared of vector (sum of square of elements)
  */
-Array.prototype.normsq = () => {
+Array.prototype.normsq = function () {
     return this.reduce((c, v) => {
         return c + v * v
     }, 0)
@@ -83,15 +83,15 @@ Array.prototype.normsq = () => {
  * 
  * @returns Vector norm of array
  */
-Array.prototype.norm = () => {
-    return Math.sqrt(this.normsq)
+Array.prototype.norm = function () {
+    return Math.sqrt(this.normsq())
 }
 
 /**
  * 
  * @returns Normalized version of array
  */
-Array.prototype.normalize = () => {
+Array.prototype.normalize = function () {
     let n = this.norm()
     return this.map((v) => {
         return v / n
