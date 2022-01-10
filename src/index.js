@@ -19,7 +19,7 @@ export { default as TLE } from './tle.js'
 // Rotation between Earth-fixed & inertial frames
 export { qTEME2ITRF, qGCRS2ITRF, gmst, gast } from './coordconversion.js'
 
-export * from './lunar_calcs.js'
+export * as moon from './lunar_calcs.js'
 
 // "Static" convenience function for running sgp4
 // outside of the tle class

@@ -27,6 +27,7 @@ const deg2rad = Math.PI / 180.0
 if (inspect == undefined)
     var inspect = Symbol.for('nodejs.util.inspect.custom');
 
+import { utcMilliseconds } from 'd3';
 import Quaternion from './quaternion.js'
 
 export default class ITRFCoord {
@@ -70,6 +71,19 @@ export default class ITRFCoord {
             (wgs84_a * C + hae) * cosp * sinl,
             (wgs84_a * S + hae) * sinp)
     }
+
+    /**
+     * 
+     * @param {Number} lat_deg Latitude in degrees
+     * @param {Number} lon_deg Longitude in degrees
+     * @param {Number} hae height above ellipsoid, meters
+     * @returns 
+     */
+    static fromGeodticDeg(lat_deg, lon_deg, hae) {
+        const deg2rad = Math.PI / 180.
+        return ITRFCoord.fromGeodetic(lat_deg * deg2rad, lon_deg * deg2rad, hae)
+    }
+
 
     /**
      * 

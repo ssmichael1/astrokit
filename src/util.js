@@ -18,15 +18,15 @@ export const sind = (a) => Math.sin(a * deg2rad)
 
 /**
  * 
- * @param {a} angle in degrees 
+ * @param {Number} a angle in degrees 
  * @returns Cos of angle
  */
 export const cosd = (a) => Math.cos(a * deg2rad)
 
 /**
  * 
- * @param {a} 1st Vector for cross product
- * @param {b} 2nd vector for cross product 
+ * @param {Array} a 1st Vector for cross product
+ * @param {Array} b 2nd vector for cross product 
  * @returns cross product of a & b
  */
 export const cross = (a, b) => {
@@ -39,7 +39,7 @@ export const cross = (a, b) => {
 
 /**
  * Vector dot product
- * @param {other} Vector to dot product against
+ * @param {Array} other Vector to dot product against
  * @returns vector dot product of this and other
  */
 Array.prototype.dot = (other) => {
@@ -48,6 +48,13 @@ Array.prototype.dot = (other) => {
     }, 0)
 }
 
+/**
+ * 
+ * Vector cross product
+ * 
+ * @param {Array} other Vector to cross product with 
+ * @returns Vector cross product of this and other (this X other)
+ */
 Array.prototype.cross = (other) => {
     let c = [0, 0, 0]
     c[0] = this[1] * other[2] - this[2] * other[1]
@@ -58,7 +65,7 @@ Array.prototype.cross = (other) => {
 
 /**
  * 
- * @param {other} vector to add to this
+ * @param {Array} other vector to add to this
  * @returns element-wise addition of this and other
  */
 Array.prototype.eadd = (other) => {
@@ -100,8 +107,8 @@ Array.prototype.normalize = function () {
 
 /**
  * 
- * @param {v1} Vector 1, a 3-element vector
- * @param {v2} Vector 2, a 3-element vector
+ * @param {Array} v1 Vector 1, a 3-element vector
+ * @param {Array} v2 Vector 2, a 3-element vector
  * @returns Angle in radians between v1 and v2
  */
 export const angleBetweenVectors = (v1, v2) => {
