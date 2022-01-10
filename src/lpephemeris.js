@@ -11,6 +11,7 @@
  */
 
 import ITRFCoord from './itrfcoord.js'
+import { sind, cosd } from './util.js'
 
 /**
  * Bodies for which position can be computed
@@ -179,52 +180,6 @@ const lpephem = {
     ]
 };
 
-// Stick cross product here for lack of a better place
-Array.prototype.cross = function (other) {
-    var result = [0, 0, 0]
-    result[0] = this[1] * other[2] - this[2] * other[1];
-    result[1] = this[2] * other[0] - this[0] * other[2];
-    result[2] = this[0] * other[1] - this[1] * other[0]
-    return result
-}
-
-Array.prototype.eadd = function (other) {
-    var result = []
-    for (let i = 0; i < this.length; i++) {
-        result.push(this[i] + other[i])
-    }
-    return result
-}
-
-Array.prototype.normalize = function () {
-    let n = this.norm()
-    if (n == 0)
-        return
-    for (let i = 0; i < this.length; i++) {
-        this[i] = this[i] / n
-    }
-    return this
-}
-
-Array.prototype.norm = function () {
-    let n = 0
-    for (let i = 0; i < this.length; i++) {
-        n += this[i] * this[i]
-    }
-    return Math.sqrt(n)
-}
-
-const sind = function (a) {
-    const deg2rad = Math.PI / 180.0;
-    return Math.sin(a * deg2rad)
-}
-
-const cosd = function (a) {
-    const deg2rad = Math.PI / 180.0;
-    return Math.cos(a * deg2rad);
-}
-
-
 /**
  * 
  * Compute moon position in Earth-centered frame
@@ -337,6 +292,7 @@ export function bodyPosHelio(name, thedate) {
 /**
  * 
  * Sun position in the Mean-of-Date frame
+ * Vallado algorithm 29, page 279
  * 
  * @param {Date} thedate Date for which position is computed
  * @returns Sun position in Earth-centered MOD frame, meters

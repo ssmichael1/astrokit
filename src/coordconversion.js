@@ -15,6 +15,8 @@
 import Quaternion from './quaternion.js';
 import './date_extensions.js'
 
+const deg2rad = Math.PI / 180.0
+
 /**
  * Greenwich mean sidereal time
  * 
@@ -30,9 +32,11 @@ export const gmst = (jd_ut1) => {
         + (tut1 * (0.093104 - tut1 * 6.2E-6));
     // Convert seconds to radians
     gmst = (gmst % 86400.0) / 240.0 * Math.PI / 180.0;
+    if (gmst < 0) {
+        gmst = gmst + 2.0 * Math.PI
+    }
     return gmst;
 }
-
 
 /**
  * Greenwich apparant sidereal time

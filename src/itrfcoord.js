@@ -21,6 +21,9 @@
 const wgs84_a = 6378137
 const wgs84_f = 0.003352810664747
 
+const rad2deg = 180.0 / Math.PI
+const deg2rad = Math.PI / 180.0
+
 if (inspect == undefined)
     var inspect = Symbol.for('nodejs.util.inspect.custom');
 
@@ -214,6 +217,20 @@ export default class ITRFCoord {
      */
     latitude_deg() {
         return this.latitude() * 180.0 / Math.PI
+    }
+
+    /**
+     * @returns Geocentric latitude, radians
+     */
+    geocentric_latitude() {
+        return Math.asin(this.raw[2] / this.raw.norm())
+    }
+
+    /**
+     * @returns Gencentric latitude, degrees
+     */
+    geocentric_latitude_deg() {
+        return Math.asin(this.raw[2] / this.raw.norm()) * rad2deg
     }
 
     /**
