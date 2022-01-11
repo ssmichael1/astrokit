@@ -110,7 +110,7 @@ export const riseSet = (thedate, coord) => {
             let ra = Math.atan2(pY, pX)
             let dec = Math.asin(pZ)
 
-            let gmst_ = gmst(JDtemp) - observer_longitude
+            let gmst_ = gmst(JDtemp)
             let GHAn = gmst_ - ra
             let LHA = GHAn + observer_longitude
             if (deltaGHA == undefined) {
@@ -192,6 +192,7 @@ export const riseSet2 = (thedate, coord) => {
             azimuth: 180.0 / Math.PI * Math.atan2(enu[1], enu[0])
         }
     })
+    console.log(enu[86400 / 2 / 5])
     let riseTimes = []
     let setTimes = []
     enu.slice(1).forEach((v, idx) => {
