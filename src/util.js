@@ -11,10 +11,18 @@ export const rad2deg = 180.0 / Math.PI
 
 /**
  * 
- * @param {a} angle in degrees 
+ * @param {Number} a angle in degrees 
  * @returns Sin of angle
  */
 export const sind = (a) => Math.sin(a * deg2rad)
+
+/**
+ * 
+ * @param {Number} a angle in degrees
+ * @returns Tangent of angle
+ */
+export const tand = (a) => Math.tan(a * deg2rad)
+
 
 /**
  * 

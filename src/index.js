@@ -4,6 +4,8 @@ export * from './util.js'
 // For conversions to Julian date & modified Julian date
 import './date_extensions.js'
 
+export * from './date_extensions.js'
+
 // Quaternions for rotation
 export { default as Quaternion } from './quaternion.js'
 

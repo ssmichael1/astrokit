@@ -2,7 +2,6 @@ import { sind } from './util.js'
 import { moonPosGCRS } from './lpephemeris.js'
 import { gmst, qGCRS2ITRF } from './coordconversion.js'
 import { default as ITRFCoord } from './itrfcoord.js'
-import e from 'express'
 
 
 const deg2rad = Math.PI / 180.
@@ -153,11 +152,16 @@ export const riseSet = (thedate, coord) => {
         }
         return deltaJD * 24
     })
-    let dbase = new Date(Date.UTC(thedate.getUTCFullYear(),
+    let dbase1 = new Date(Date.UTC(thedate.getUTCFullYear(),
         thedate.getUTCMonth(), thedate.getUTCDate())).getTime()
-    dbase =
+    let dbase =
         new Date(thedate.getFullYear(),
             thedate.getMonth(), thedate.getDate()).getTime()
+    dbase = thedate.getTime()
+    console.log(dbase - dbase1)
+    dbase = thedate.getTime()
+    console.log(`hrise = ${hrise}`)
+    console.log(`hset = ${hset}`)
 
     return {
         rise: new Date(dbase + hrise * 3600 * 1000),
@@ -167,7 +171,7 @@ export const riseSet = (thedate, coord) => {
 
 
 export const riseSet2 = (thedate, coord) => {
-    const moon_half_extent_deg = 0
+    const moon_half_extent_deg = 1.1
     let q = coord.qENU2ITRF().conj()
 
     let dt = 5
@@ -175,10 +179,11 @@ export const riseSet2 = (thedate, coord) => {
     let enu = [...Array(86400 / dt).keys()].map((idx) => {
         let t = new Date(thedate.getTime() + idx * dt * 1000)
         let itrf = qGCRS2ITRF(t).rotate(moonPosGCRS(t))
-        let pdiff = []
-        itrf.forEach((v, idx) => {
-            pdiff.push(v - coord.raw[idx])
-        })
+        let pdiff = [
+            itrf[0] - coord.raw[0],
+            itrf[1] - coord.raw[1],
+            itrf[2] - coord.raw[2]
+        ]
         let enu = q.rotate(pdiff);
         return {
             time: t,
@@ -192,11 +197,11 @@ export const riseSet2 = (thedate, coord) => {
     enu.slice(1).forEach((v, idx) => {
         if ((v.elevation > -moon_half_extent_deg) &&
             (enu[idx].elevation < -moon_half_extent_deg)) {
-            riseTimes.push(v.time.toString())
+            riseTimes.push(v.time)
         }
         if ((v.elevation < -moon_half_extent_deg) &&
             (enu[idx].elevation > -moon_half_extent_deg)) {
-            setTimes.push(v.time.toString())
+            setTimes.push(v.time)
         }
     })
     return {

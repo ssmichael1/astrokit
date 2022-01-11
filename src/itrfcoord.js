@@ -184,7 +184,13 @@ export default class ITRFCoord {
      * @returns East-North-Up vector relative to input reference, meters
      */
     toENU(ref) {
-        return ref.qENU2ITRF().conj().rotate(
+        let lat = ref.latitude()
+        let lon = ref.longitude()
+        let q = Quaternion.mult(
+            Quaternion.qrotx(-lat + Math.PI / 2),
+            Quaternion.qrotz(lon + Math.PI / 2)
+        )
+        return q.rotate(
             [this.raw[0] - ref.raw[0],
             this.raw[1] - ref.raw[1],
             this.raw[2] - ref.raw[2]])
