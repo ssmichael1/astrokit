@@ -147,6 +147,11 @@ let utc2tai = (t) => {
         return 0
 }
 
+export const jd2Date = function (jdUTC) {
+
+    return new Date((jdUTC - 2440587.5) * 86400 * 1000)
+}
+
 // Julian date at given time scale (Default is UTC)
 Date.prototype.jd = function (ts) {
     let timeshift_seconds = 0

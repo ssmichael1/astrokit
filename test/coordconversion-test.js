@@ -15,9 +15,9 @@ tape('Greenwich Mean Sidereal Time', (test) => {
     // Example 3-5 from Vallado
     let date = new Date(Date.UTC(1992, 7, 20, 12, 14))
     let gmst_ = ak.gmst(date.jd(Date.timescale.UTC))
-    test.assert(Math.abs(gmst_ * 180.0 / Math.PI / -207.4212 - 1) < 1.0e-6,
+    console.log(gmst_ * ak.rad2deg)
+    test.assert(Math.abs(gmst_ * 180.0 / Math.PI / 152.578787810 - 1) < 1.0e-6,
         'Vallado example 3-5, finding gmst')
-
 
     test.end()
 })

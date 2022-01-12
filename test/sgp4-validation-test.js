@@ -12,12 +12,16 @@ import * as ak from '../src/index.js'
 
 import { readFileSync } from 'fs'
 import tape from 'tape'
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Load TLEs from file
 // This code is very specific to the funky file type
 // distributed by Vallado
 const load_tles = () => {
-    let rawlines = readFileSync('test/sgp4_testvecs/SGP4-VER.tle')
+    let rawlines = readFileSync(__dirname + '/sgp4_testvecs/SGP4-VER.tle')
         .toString().split("\n");
     // Read in the tles
     let tles = []
@@ -67,7 +71,7 @@ const test_tle = (tle) => {
     // Check against test vectors for this TLE
     tape('Two-line element set ID: ' + tle.satid, (test) => {
         // Name of test file result from STK
-        let fname = 'test/sgp4_testvecs/' + String(tle.satid).padStart(5, '0') + '.e'
+        let fname = __dirname + '/sgp4_testvecs/' + String(tle.satid).padStart(5, '0') + '.e'
 
         // load lines from test file
         let rawlines = readFileSync(fname).toString().split("\n")

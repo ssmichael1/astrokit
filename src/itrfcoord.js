@@ -21,9 +21,13 @@
 const wgs84_a = 6378137
 const wgs84_f = 0.003352810664747
 
+const rad2deg = 180.0 / Math.PI
+const deg2rad = Math.PI / 180.0
+
 if (inspect == undefined)
     var inspect = Symbol.for('nodejs.util.inspect.custom');
 
+import { utcMilliseconds } from 'd3';
 import Quaternion from './quaternion.js'
 
 export default class ITRFCoord {
@@ -67,6 +71,19 @@ export default class ITRFCoord {
             (wgs84_a * C + hae) * cosp * sinl,
             (wgs84_a * S + hae) * sinp)
     }
+
+    /**
+     * 
+     * @param {Number} lat_deg Latitude in degrees
+     * @param {Number} lon_deg Longitude in degrees
+     * @param {Number} hae height above ellipsoid, meters
+     * @returns 
+     */
+    static fromGeodticDeg(lat_deg, lon_deg, hae) {
+        const deg2rad = Math.PI / 180.
+        return ITRFCoord.fromGeodetic(lat_deg * deg2rad, lon_deg * deg2rad, hae)
+    }
+
 
     /**
      * 
@@ -167,7 +184,13 @@ export default class ITRFCoord {
      * @returns East-North-Up vector relative to input reference, meters
      */
     toENU(ref) {
-        return ref.qENU2ITRF().conj().rotate(
+        let lat = ref.latitude()
+        let lon = ref.longitude()
+        let q = Quaternion.mult(
+            Quaternion.rotx(-lat + Math.PI / 2),
+            Quaternion.rotz(lon + Math.PI / 2)
+        )
+        return q.rotate(
             [this.raw[0] - ref.raw[0],
             this.raw[1] - ref.raw[1],
             this.raw[2] - ref.raw[2]])
@@ -214,6 +237,20 @@ export default class ITRFCoord {
      */
     latitude_deg() {
         return this.latitude() * 180.0 / Math.PI
+    }
+
+    /**
+     * @returns Geocentric latitude, radians
+     */
+    geocentric_latitude() {
+        return Math.asin(this.raw[2] / this.raw.norm())
+    }
+
+    /**
+     * @returns Gencentric latitude, degrees
+     */
+    geocentric_latitude_deg() {
+        return Math.asin(this.raw[2] / this.raw.norm()) * rad2deg
     }
 
     /**
