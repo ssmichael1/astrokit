@@ -13,7 +13,7 @@ let thedate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 // Get location
 // Kauai, Hi is a nice place:
 let groundpos = ak.ITRFCoord.fromGeodeticDeg(22.0964, -159.5261)
-console.log('Ground site:\n${groundpos}\n')
+console.log(`Ground site:\n${groundpos}\n`)
 
 // Get rise and set times
 let riseset = ak.sun.riseSet(thedate, groundpos)

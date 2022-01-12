@@ -259,7 +259,7 @@ export default class ITRFCoord {
     toString() {
         return `ITRFCoord(Latitude = ${this.latitude_deg().toFixed(3)} deg, `
             + `Longitude = ${this.longitude_deg().toFixed(3)} deg, `
-            + `Height = ${this.height()} m)`
+            + `Height = ${this.height().toFixed(0)} m)`
     }
 
 
