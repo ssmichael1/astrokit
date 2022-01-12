@@ -1,10 +1,13 @@
 // Utility functions
 export * from './util.js'
 
+// Solar phenomenon
+export * from './solar_calcs.js'
+
 // For conversions to Julian date & modified Julian date
 import './date_extensions.js'
 
-export * from './date_extensions.js'
+export * as sun from './date_extensions.js'
 
 // Quaternions for rotation
 export { default as Quaternion } from './quaternion.js'

@@ -187,8 +187,8 @@ export default class ITRFCoord {
         let lat = ref.latitude()
         let lon = ref.longitude()
         let q = Quaternion.mult(
-            Quaternion.qrotx(-lat + Math.PI / 2),
-            Quaternion.qrotz(lon + Math.PI / 2)
+            Quaternion.rotx(-lat + Math.PI / 2),
+            Quaternion.rotz(lon + Math.PI / 2)
         )
         return q.rotate(
             [this.raw[0] - ref.raw[0],

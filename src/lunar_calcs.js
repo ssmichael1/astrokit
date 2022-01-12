@@ -1,8 +1,7 @@
 import { sind } from './util.js'
-import { moonPosGCRS } from './lpephemeris.js'
-import { gmst, qGCRS2ITRF } from './coordconversion.js'
+import { gmst } from './coordconversion.js'
 import { default as ITRFCoord } from './itrfcoord.js'
-
+import { jd2Date } from './date_extensions.js'
 
 const deg2rad = Math.PI / 180.
 const rad2deg = 180. / Math.PI
@@ -59,6 +58,9 @@ export const fractionIlluminated = (thedate) => {
 
 /**
  * 
+ * riseSet
+ * Return rise and set time on the given Julian date
+ * 
  * @param {Date} thedate Date Object
  * @param {ITRFCoord} coord Coordinate at which to communicate rise & set
  * @returns JSON with moon rise and set times as javascript Dates
@@ -72,9 +74,10 @@ export const riseSet = (thedate, coord) => {
     let tolerance = 10 / 86400
     let fields = ['rise', 'set']
 
+
     let [hrise, hset] = fields.map((v, riseidx) => {
         let cnt = 0
-        let JDtemp = thedate.jd()
+        let JDtemp = Math.floor(thedate.jd()) + 0.5 - observer_longitude / (2.0 * Math.PI)
         let deltaUT = .001
         let deltaJD = 0.0
         let deltaGHA = undefined
@@ -145,68 +148,15 @@ export const riseSet = (thedate, coord) => {
                 GHA = GHAn
             } // end of not advancing one day
             JDtemp = JDtemp + deltaUT
-
-
             deltaJD = deltaJD + deltaUT
             cnt = cnt + 1
         }
-        return deltaJD * 24
+        return jd2Date(JDtemp)
     })
-    let dbase1 = new Date(Date.UTC(thedate.getUTCFullYear(),
-        thedate.getUTCMonth(), thedate.getUTCDate())).getTime()
-    let dbase =
-        new Date(thedate.getFullYear(),
-            thedate.getMonth(), thedate.getDate()).getTime()
-    dbase = thedate.getTime()
-    console.log(dbase - dbase1)
-    dbase = thedate.getTime()
-    console.log(`hrise = ${hrise}`)
-    console.log(`hset = ${hset}`)
+
 
     return {
-        rise: new Date(dbase + hrise * 3600 * 1000),
-        set: new Date(dbase + hset * 3600 * 1000)
-    }
-}
-
-
-export const riseSet2 = (thedate, coord) => {
-    const moon_half_extent_deg = 1.1
-    let q = coord.qENU2ITRF().conj()
-
-    let dt = 5
-    // Construct time series
-    let enu = [...Array(86400 / dt).keys()].map((idx) => {
-        let t = new Date(thedate.getTime() + idx * dt * 1000)
-        let itrf = qGCRS2ITRF(t).rotate(moonPosGCRS(t))
-        let pdiff = [
-            itrf[0] - coord.raw[0],
-            itrf[1] - coord.raw[1],
-            itrf[2] - coord.raw[2]
-        ]
-        let enu = q.rotate(pdiff);
-        return {
-            time: t,
-            enu: enu,
-            elevation: 180.0 / Math.PI * Math.asin(enu[2] / enu.norm()),
-            azimuth: 180.0 / Math.PI * Math.atan2(enu[1], enu[0])
-        }
-    })
-    console.log(enu[86400 / 2 / 5])
-    let riseTimes = []
-    let setTimes = []
-    enu.slice(1).forEach((v, idx) => {
-        if ((v.elevation > -moon_half_extent_deg) &&
-            (enu[idx].elevation < -moon_half_extent_deg)) {
-            riseTimes.push(v.time)
-        }
-        if ((v.elevation < -moon_half_extent_deg) &&
-            (enu[idx].elevation > -moon_half_extent_deg)) {
-            setTimes.push(v.time)
-        }
-    })
-    return {
-        rise: riseTimes,
-        set: setTimes
+        rise: hrise,
+        set: hset
     }
 }
