@@ -53,13 +53,10 @@ export function posMOD(thedate) {
  * @param {Date} thedate Date for which to compute sunrise & sunset
  * @param {ITRFCoord} coord Ground location for which to compute 
  * @param {Number} sigma Angle between noon and rise/set, in degrees:
- %                       rise/set: 90 deg
+ %                       rise/set: 90 deg, 50 arcmin
  *                       Civil twilight: 96 deg
- *                       Nautical twilight: 96 deg
+ *                       Nautical twilight: 102 deg
  *                       Astronomical twilight: 108 deg
- *                       Note: 50 arcmin should be added to values above 
- *                       to account for refraction & size of sun
- *                       If no value is passed, rise & set are assumed
  * 
  * @returns  { rise: Date Object of rise, set: Date object of set }
  */
@@ -78,6 +75,10 @@ export const riseSet = (thedate, coord, sigma) => {
         lhafunc: (x) => x
     }]
 
+    // Sigma is angle between site and sun
+    if (sigma == undefined)
+        sigma = 90 + 50 / 60
+
     let jd0h = thedate.jd(Date.timescale.UTC)
     jd0h = Math.round(jd0h * 2) / 2
     let riseset = calcterms.map((v) => {
@@ -86,9 +87,6 @@ export const riseSet = (thedate, coord, sigma) => {
         jd = jd - longitude / 360
         let T = (jd - 2451545.0) / 36525
 
-        // Sigma is angle between site and sun
-        if (sigma == undefined)
-            sigma = 90 + 50 / 60
 
         let lambda_sun = 280.4606184 + 36000.77005361 * T
         let Msun = 357.5291092 + 35999.05034 * T
