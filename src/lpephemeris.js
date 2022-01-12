@@ -182,48 +182,6 @@ const lpephem = {
 
 /**
  * 
- * Compute moon position in Earth-centered frame
- * Algorithm 31 from Vallado
- * 
- * @param {Date} thedate Date for which to compute position
- * @returns 3-vector representing moon position in GCRS frame, meters
- */
-export function moonPosGCRS(thedate) {
-    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
-    let lambda_ecliptic = 218.32 + 481267.8813 * T +
-        6.29 * sind(134.9 + 477198.85 * T) -
-        1.27 * sind(259.2 - 413335.38 * T) +
-        0.66 * sind(235.7 + 890534.23 * T) +
-        0.21 * sind(269.9 + 954397.70 * T) -
-        0.19 * sind(357.5 + 35999.05 * T) -
-        0.11 * sind(186.6 + 966404.05 * T);
-
-    let phi_ecliptic = 5.13 * sind(93.3 + 483202.03 * T) +
-        0.28 * sind(228.2 + 960400.87 * T) -
-        0.28 * sind(318.3 + 6003.18 * T) -
-        0.17 * sind(217.6 - 407332.20 * T);
-
-    let hparallax = 0.9508 +
-        0.0518 * cosd(134.9 + 477198.85 * T) +
-        0.0095 * cosd(259.2 - 413335.38 * T) +
-        0.0078 * cosd(235.7 + 890534.23 * T) +
-        0.0028 * cosd(269.9 + 954397.70 * T);
-
-    let epsilon =
-        23.439291 - 0.0130042 * T - 1.64e-7 * T * T + 5.04E-7 * T * T * T;
-
-    let rmag = univ.EarthRadius / sind(hparallax);
-
-    return [cosd(phi_ecliptic) * cosd(lambda_ecliptic),
-    cosd(epsilon) * cosd(phi_ecliptic) * sind(lambda_ecliptic)
-    - sind(epsilon) * sind(phi_ecliptic),
-    sind(epsilon) * cosd(phi_ecliptic) * sind(lambda_ecliptic)
-    + cosd(epsilon) * sind(phi_ecliptic)].map(x => x * rmag)
-
-}
-
-/**
- * 
  * Implements JPL low-precision calculations for 
  * solar system ephemerides in the Heliocentric frame
  * https://ssd.jpl.nasa.gov/txt/aprx_pos_planets.pdf
@@ -286,77 +244,6 @@ export function bodyPosHelio(name, thedate) {
     let yeq = cobliquity * yecl - sobliquity * zecl;
     let zeq = sobliquity * yecl + cobliquity * zecl;
     return [xeq, yeq, zeq].map(x => x * univ.AU)
-
-}
-
-/**
- * 
- * Sun position in the Mean-of-Date frame
- * Vallado algorithm 29, page 279
- * 
- * @param {Date} thedate Date for which position is computed
- * @returns Sun position in Earth-centered MOD frame, meters
- * 
- */
-export function sunPosMOD(thedate) {
-    // Approximate UT1 with UTC
-    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
-    const deg2rad = Math.PI / 180.
-    //const rad2deg = Math.PI / 180.
-
-    // Mean longitude
-    let lambda = (280.46 + 36000.77 * T);
-
-    // mean anomaly
-    let M = deg2rad * (357.5277233 + 35999.05034 * T);
-
-    // obliquity
-    let epsilon = deg2rad * (23.439291 - 0.0130042 * T);
-
-    // Ecliptic
-    let lambda_ecliptic = deg2rad * (
-        lambda + 1.914666471 * Math.sin(M) + 0.019994643 * Math.sin(2.0 * M))
-
-    let r =
-        (1.000140612 - 0.016708617 * Math.cos(M) - 0.000139589 * Math.cos(2. * M));
-    r = r * univ.AU;
-
-    return [Math.cos(lambda_ecliptic),
-    Math.sin(lambda_ecliptic) * Math.cos(epsilon),
-    Math.sin(lambda_ecliptic) * Math.sin(epsilon)].map(x => x * r)
-
-}
-
-/**
- * 
- * Compute sun position in Earth-centered GCRS frame
- * using low-precision ephemerides provided by JPL
- * 
- * @param {Date} thedate Date for which to compute position
- * @returns 3-vector representing sun position in Earth-centered GCRS frame
- */
-export const sunPosGCRS = (thedate) => {
-    return bodyPosHelio(SolarSystemBodies.EarthMoon, thedate)
-        .map(x => -1 * x)
-        .eadd(moonPosGCRS(thedate).map(x => x / (1.0 + univ.EarthMoonMassRatio)))
-
-}
-
-
-/**
- * 
- * Compute sun position in Earth-centered ITRF frame
- * using low-precision ephemerides provided by JPL
- * 
- * @param {Date} thedate Date for which to compute position
- * @returns 3-vector representing sun position in Earth-centered GCRS frame
- */
-
-export const sunPosITRF = (thedate) => {
-    return ITRFCoord(
-        qGCRS2ITRF(thedate).rotate(bodyPosHelio(SolarSystemBodies.EarthMoon, thedate)
-            .map(x => -1 * x)
-            .eadd(moonPosGCRS(thedate).map(x => x / (1.0 + univ.EarthMoonMassRatio)))))
 
 }
 

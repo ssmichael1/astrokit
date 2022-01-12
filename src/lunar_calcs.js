@@ -1,10 +1,53 @@
-import { sind } from './util.js'
+import { sind, cosd } from './util.js'
 import { gmst } from './coordconversion.js'
 import { default as ITRFCoord } from './itrfcoord.js'
 import { jd2Date } from './date_extensions.js'
+import { univ } from './lpephemeris.js'
 
 const deg2rad = Math.PI / 180.
 const rad2deg = 180. / Math.PI
+
+/**
+ * 
+ * Compute moon position in Earth-centered frame
+ * Algorithm 31 from Vallado
+ * 
+ * @param {Date} thedate Date for which to compute position
+ * @returns 3-vector representing moon position in GCRS frame, meters
+ */
+export function posGCRS(thedate) {
+    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
+    let lambda_ecliptic = 218.32 + 481267.8813 * T +
+        6.29 * sind(134.9 + 477198.85 * T) -
+        1.27 * sind(259.2 - 413335.38 * T) +
+        0.66 * sind(235.7 + 890534.23 * T) +
+        0.21 * sind(269.9 + 954397.70 * T) -
+        0.19 * sind(357.5 + 35999.05 * T) -
+        0.11 * sind(186.6 + 966404.05 * T);
+
+    let phi_ecliptic = 5.13 * sind(93.3 + 483202.03 * T) +
+        0.28 * sind(228.2 + 960400.87 * T) -
+        0.28 * sind(318.3 + 6003.18 * T) -
+        0.17 * sind(217.6 - 407332.20 * T);
+
+    let hparallax = 0.9508 +
+        0.0518 * cosd(134.9 + 477198.85 * T) +
+        0.0095 * cosd(259.2 - 413335.38 * T) +
+        0.0078 * cosd(235.7 + 890534.23 * T) +
+        0.0028 * cosd(269.9 + 954397.70 * T);
+
+    let epsilon =
+        23.439291 - 0.0130042 * T - 1.64e-7 * T * T + 5.04E-7 * T * T * T;
+
+    let rmag = univ.EarthRadius / sind(hparallax);
+
+    return [cosd(phi_ecliptic) * cosd(lambda_ecliptic),
+    cosd(epsilon) * cosd(phi_ecliptic) * sind(lambda_ecliptic)
+    - sind(epsilon) * sind(phi_ecliptic),
+    sind(epsilon) * cosd(phi_ecliptic) * sind(lambda_ecliptic)
+    + cosd(epsilon) * sind(phi_ecliptic)].map(x => x * rmag)
+
+}
 
 /**
  * 

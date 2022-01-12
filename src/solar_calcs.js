@@ -1,12 +1,51 @@
 import { sind, cosd, tand } from './util.js'
 import { default as ITRFCoord } from './itrfcoord.js'
 import { jd2Date } from './date_extensions.js'
+import { univ } from './lpephemeris.js'
 
 const rad2deg = 180. / Math.PI
 
 // Zero-hour GMST, equation 3-45 in Vallado
 const gmst0h = (T) => {
     return (100.4606184 + 36000.77005361 * T + 0.00038793 * T * T - 2.6E-8 * T * T * T) % 360.0
+}
+
+
+/**
+ * 
+ * Sun position in the Mean-of-Date frame
+ * Vallado algorithm 29, page 279
+ * 
+ * @param {Date} thedate Date for which position is computed
+ * @returns Sun position in Earth-centered MOD frame, meters
+ * 
+ */
+export function posMOD(thedate) {
+    // Approximate UT1 with UTC
+    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
+    const deg2rad = Math.PI / 180.
+    //const rad2deg = Math.PI / 180.
+
+    // Mean longitude
+    let lambda = (280.46 + 36000.77 * T);
+
+    // mean anomaly
+    let M = deg2rad * (357.5277233 + 35999.05034 * T);
+
+    // obliquity
+    let epsilon = deg2rad * (23.439291 - 0.0130042 * T);
+
+    // Ecliptic
+    let lambda_ecliptic = deg2rad * (
+        lambda + 1.914666471 * Math.sin(M) + 0.019994643 * Math.sin(2.0 * M))
+
+    let r =
+        (1.000140612 - 0.016708617 * Math.cos(M) - 0.000139589 * Math.cos(2. * M));
+    r = r * univ.AU;
+
+    return [Math.cos(lambda_ecliptic),
+    Math.sin(lambda_ecliptic) * Math.cos(epsilon),
+    Math.sin(lambda_ecliptic) * Math.sin(epsilon)].map(x => x * r)
 }
 
 /**
