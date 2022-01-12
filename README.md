@@ -5,8 +5,9 @@
 The Astronomy Toolkit is a javascript module for handling a few simple satellite and astronomy tasks, including:
 
 * Propagation of two-line element sets representing satellite ephemerides via native JavaScript translation of Vallado SGP4 propagator
+* Solar & lunar ephemerides
+* Lunar phase and fraction illuminated
 * Planetary ephemerides (low precision from NASA JPL)
-* Sun & Moon ephemerides
 * Coordinate conversions between Earth-fixed and inertial space
 * Class for handling International Terrestrial Reference Frame
     * Conversion to and from geodetic coordines (latitude, longitude, height)
@@ -39,6 +40,10 @@ Examples are included in the <tt>examples</tt> directory and can be run via [Nod
 * **<tt>satellite_comm_access.js</tt>**: Given input TLE for the TROPICS Pathfinder satellite (sun synchronous orbit), compute contact times over an orbit for the communications ground station in Svalbard, Norway
 
 * **<tt>solarpanels.js</tt>**: Use sun position and rotation to Earth-fixed frame to compute maximum expected power generation of solar panel system (in this case, the one on the roof of my house)
+
+* **<tt>suncalcs.js</tt>**: Compute sun rise and sunset times for today in Kauai, HI.  Also compute civil, nautical, and astronomical twilight.  Compute sun elevation in sky and sun heading
+
+* **<tt>mooncalcs.js</tt>**: Compute moon rise & set time for today in Kauai, HI.  Also compute phase of moon, fraction illuminated, current elevation, and current heading.
 
 For reference the code for <tt>iss_groundtrack.js</tt> is below.
 
