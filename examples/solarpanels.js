@@ -60,7 +60,7 @@ let loc = ak.ITRFCoord.fromGeodeticDeg(
 // at each time
 let sunDirENU = tmarray.map(x => new ak.ITRFCoord(
     ak.qGCRS2ITRF(x).rotate( // rotation from inertial to eArth fixed fraem
-        ak.sunPosGCRS(new Date(x.valueOf())))) // Position of sun
+        ak.sun.posMOD(new Date(x.valueOf())))) // Position of sun
     .toENU(loc) // Rotate to ENU relative to house location
     .normalize() // Normalize
 )

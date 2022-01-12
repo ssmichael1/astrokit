@@ -419,7 +419,7 @@
 
         // Update sun position & terminator
         // Subtract of ~ 8 minutes for light travel time from sun = 480000 milliseconds
-        let sunpos = new ak.ITRFCoord(q.rotate(ak.sunPosGCRS(new Date(now - 480000))))
+        let sunpos = new ak.ITRFCoord(q.rotate(ak.sun.posMOD(new Date(now - 480000))))
         let antipode = { latitude: -sunpos.latitude_deg(), longitude: sunpos.longitude_deg() - 180 }
         if (antipode.longitude < -180) {
             antipode.longitude = antipode.longitude + 360
@@ -700,11 +700,7 @@
                 plot_contact(pass, 'contactazimuthplot', 'azimuth', [-180, 180], 'Ground Azimuth (deg)')
             }
         });
-        // Select 1st row, if there are more than 0
-        if (table.rows()[0].length > 0) {
-            console.log(table.row(0))
-            console.log(table.$('tr.first'))
-        }
+
 
         $('#button').click(function () {
             table.row('.selected').remove().draw(false);
