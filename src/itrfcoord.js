@@ -27,7 +27,6 @@ const deg2rad = Math.PI / 180.0
 if (inspect == undefined)
     var inspect = Symbol.for('nodejs.util.inspect.custom');
 
-import { utcMilliseconds } from 'd3';
 import Quaternion from './quaternion.js'
 
 export default class ITRFCoord {

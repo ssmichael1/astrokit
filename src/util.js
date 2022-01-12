@@ -50,7 +50,7 @@ export const cross = (a, b) => {
  * @param {Array} other Vector to dot product against
  * @returns vector dot product of this and other
  */
-Array.prototype.dot = (other) => {
+Array.prototype.dot = function (other) {
     return this.reduce((c, v, idx) => {
         return c + v * other[idx]
     }, 0)
@@ -63,7 +63,7 @@ Array.prototype.dot = (other) => {
  * @param {Array} other Vector to cross product with 
  * @returns Vector cross product of this and other (this X other)
  */
-Array.prototype.cross = (other) => {
+Array.prototype.cross = function (other) {
     let c = [0, 0, 0]
     c[0] = this[1] * other[2] - this[2] * other[1]
     c[1] = this[2] * other[0] - this[0] * other[2]
@@ -76,7 +76,7 @@ Array.prototype.cross = (other) => {
  * @param {Array} other vector to add to this
  * @returns element-wise addition of this and other
  */
-Array.prototype.eadd = (other) => {
+Array.prototype.eadd = function (other) {
     let c = other
     this.map((v, idx) => {
         c[idx] = v + other[idx]
