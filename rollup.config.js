@@ -1,13 +1,22 @@
-import { babel } from '@rollup/plugin-babel';
+import { readFileSync } from "fs";
+import * as meta from "./package.json";
 
-const config = {
-    input: 'src/index.js',
+// Extract copyrights from the LICENSE.
+const copyright = readFileSync("./LICENSE", "utf-8")
+    .split(/\n/g)
+    .filter(line => /^Copyright\s+/.test(line))
+    .map(line => line.replace(/^Copyright\s+/, ""))
+    .join(", ");
+
+export default {
+    input: "src/index.js",
     output: {
-        format: 'umd',
-        file: 'dist/astrokit.js',
-        name: 'ak'
+        file: `dist/${meta.name}.js`,
+        name: "ak",
+        format: "umd",
+        indent: false,
+        extend: true,
+        banner: `// v${meta.version} Copyright ${copyright}`
     },
-    plugins: [babel({ babelHelpers: 'bundled' })]
 };
 
-export default config;

@@ -15,7 +15,7 @@ const rad2deg = 180. / Math.PI
  * @param {Date} thedate Date for which to compute position
  * @returns 3-vector representing moon position in GCRS frame, meters
  */
-export function posGCRS(thedate) {
+const posGCRS = (thedate) => {
     let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
     let lambda_ecliptic = 218.32 + 481267.8813 * T +
         6.29 * sind(134.9 + 477198.85 * T) -
@@ -56,7 +56,7 @@ export function posGCRS(thedate) {
  * @param {Date} thedate Date for which to compute position
  * @returns Moon phase in radians, in range [-pi pi]
  */
-export const phase = (thedate) => {
+const phase = (thedate) => {
     let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
 
 
@@ -95,7 +95,7 @@ export const phase = (thedate) => {
  * @returns Fraction of moon illuminated by sun as seen from Earth,
  *          in range [0,1]
  */
-export const fractionIlluminated = (thedate) => {
+const fractionIlluminated = (thedate) => {
     return 0.5 * (1 - Math.cos(phase(thedate)))
 }
 
@@ -108,7 +108,7 @@ export const fractionIlluminated = (thedate) => {
  * @param {ITRFCoord} coord Coordinate at which to communicate rise & set
  * @returns JSON with moon rise and set times as javascript Dates
  */
-export const riseSet = (thedate, coord) => {
+const riseSet = (thedate, coord) => {
 
     let observer_longitude = coord.longitude()
     let observer_latitude = coord.geocentric_latitude()
@@ -202,4 +202,12 @@ export const riseSet = (thedate, coord) => {
         rise: hrise,
         set: hset
     }
+}
+
+export const moon =
+{
+    riseSet: riseSet,
+    phase: phase,
+    fractionIlluminated: fractionIlluminated,
+    posGCRS: posGCRS
 }

@@ -1,6 +1,6 @@
 {
   "name": "astrokit",
-  "version": "0.6.1",
+  "version": "0.6.3",
   "description": "Toolkit for solar system ephemerides and satellite propagation via SGP4",
   "keywords": [
     "solar",
@@ -24,11 +24,15 @@
   "license": "ISC",
   "homepage": "https://github.com/StevenSamirMichael/astrokit",
   "type": "module",
-  "main": "dist/astrokit.js",
-  "module": "src/index",
+  "main": "src/index.js",
+  "module": "src/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/StevenSamirMichael/astrokit.git"
+  },
+  "exports": {
+    "umd": "./dist/astrokit.min.js",
+    "default": "./src/index.js"
   },
   "scripts": {
     "test": "tape 'test/**/*-test.js' && eslint src",
@@ -37,9 +41,9 @@
     "prepare": "npm run build:min"
   },
   "devDependencies": {
-    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.1.3",
     "axios": "^0.24.0",
-    "babelrc-rollup": "^3.0.0",
     "d3": "^7.2.1",
     "d3-geo": "^3.0.1",
     "datatables": "^1.10.18",
@@ -51,6 +55,8 @@
     "jquery-ui-dist": "^1.13.0",
     "package-preamble": "^0.1.0",
     "rollup": "^2.57.0",
+    "rollup-plugin-ascii": "^0.0.3",
+    "rollup-plugin-terser": "^7.0.2",
     "tape": "^5.3.1",
     "topojson-client": "^3.1.0",
     "uglify-js": "^3.14.2",

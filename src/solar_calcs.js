@@ -20,7 +20,7 @@ const gmst0h = (T) => {
  * @returns Sun position in Earth-centered MOD frame, meters
  * 
  */
-export function posMOD(thedate) {
+function posMOD(thedate) {
     // Approximate UT1 with UTC
     let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
     const deg2rad = Math.PI / 180.
@@ -60,7 +60,7 @@ export function posMOD(thedate) {
  * 
  * @returns  { rise: Date Object of rise, set: Date object of set }
  */
-export const riseSet = (thedate, coord, sigma) => {
+const riseSet = (thedate, coord, sigma) => {
     let latitude = coord.latitude_deg()
     let longitude = coord.longitude_deg()
 
@@ -112,3 +112,8 @@ export const riseSet = (thedate, coord, sigma) => {
     return { rise: riseset[0], set: riseset[1] }
 }
 
+export const sun =
+{
+    riseSet: riseSet,
+    posMOD: posMOD
+}
