@@ -1,7 +1,7 @@
 import { sind, cosd } from './astroutil.js'
 import { gmst } from './coordconversion.js'
 import { jd2Date } from './date_extensions.js'
-import { univ } from './lpephemeris.js'
+import { univ } from './univ.js'
 import { Vec3 } from './quaternion.js'
 import { default as ITRFCoord } from './itrfcoord.js'
 

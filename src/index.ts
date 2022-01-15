@@ -6,6 +6,8 @@ export * from './solar_calcs.js'
 
 export * from './lunar_calcs.js'
 
+export * from './univ.js'
+
 export { default as Quaternion } from './quaternion.js'
 
 export * from './date_extensions.js'

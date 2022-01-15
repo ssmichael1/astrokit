@@ -101,6 +101,7 @@
     "src/sgp4.ts",
     "src/solar_calcs.ts",
     "src/lunar_calcs.ts",
-    "src/lpephemeris.ts"
+    "src/lpephemeris.ts",
+    "src/univ.ts"
   ]
 }
