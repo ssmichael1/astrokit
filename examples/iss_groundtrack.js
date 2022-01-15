@@ -45,6 +45,7 @@ let iss_groundtrack = times.map((t) => {
     // by running "sgp4" orbit propagator with iss TLE and
     // desired time as input
     let rv = ak.sgp4(iss, t)
+    console.log(rv)
 
     // Get quaternion to rotate from TEME frame to ITRF frame
     // TEME = Earth-centered pseudo-inertial frame in which sgp4

@@ -20,6 +20,8 @@
  * 
  */
 
+import { Vec3 } from "./quaternion"
+
 
 /*     ----------------------------------------------------------------
 *
@@ -1568,7 +1570,12 @@ function initl(xke: number, j2: number,
 		double r[3], double v[3]	
 	)
 */
-export const sgp4 = (satrec: any, tsince: number): any => {
+type rv = {
+	r: Vec3,
+	v: Vec3
+}
+
+export const sgp4 = (satrec: any, tsince: number): rv | undefined => {
 
 	let r = [0, 0, 0]
 	let v = [0, 0, 0]
@@ -1690,7 +1697,7 @@ export const sgp4 = (satrec: any, tsince: number): any => {
 		//         printf("# error nm %f\n", nm);
 		satrec.error = 2;
 		// sgp4fix add return
-		return false;
+		return undefined;
 	}
 	am = pow((satrec.xke / nm), x2o3) * tempa * tempa;
 	nm = satrec.xke / pow(am, 1.5);
@@ -1702,7 +1709,7 @@ export const sgp4 = (satrec: any, tsince: number): any => {
 		//         printf("# error em %f\n", em);
 		satrec.error = 1;
 		// sgp4fix to return if there is an error in eccentricity
-		return false;
+		return undefined;
 	}
 	// sgp4fix fix tolerance to avoid a divide by zero
 	if (em < 1.0e-6)
@@ -1769,7 +1776,7 @@ export const sgp4 = (satrec: any, tsince: number): any => {
 			//            printf("# error ep %f\n", ep);
 			satrec.error = 3;
 			// sgp4fix add return
-			return false;
+			return undefined;
 		}
 	} // if method = d
 
@@ -1816,7 +1823,7 @@ export const sgp4 = (satrec: any, tsince: number): any => {
 		//         printf("# error pl %f\n", pl);
 		satrec.error = 4;
 		// sgp4fix add return
-		return false;
+		return undefined
 	}
 	else {
 		rl = am * (1.0 - ecose);
@@ -1878,10 +1885,13 @@ export const sgp4 = (satrec: any, tsince: number): any => {
 	if (mrt < 1.0) {
 		//         printf("# decay condition %11.6f \n",mrt);
 		satrec.error = 6;
-		return false;
+		return undefined;
 	}
 
-	return { r, v }
+	return {
+		r: [r[0], r[1], r[2]],
+		v: [v[0], v[1], v[2]]
+	}
 
 	//#include "debug7.cpp"
 	//return true;
