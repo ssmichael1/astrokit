@@ -1,4 +1,3 @@
-import TLE from './tle'
 
 export * from './astroutil.js'
 
@@ -20,5 +19,7 @@ export { qTEME2ITRF, qGCRS2ITRF, gmst, gast } from './coordconversion.js'
 
 export { default as TLE } from './tle.js'
 
+
+import TLE from './tle'
 export const sgp4 = (tle: TLE, thedate: Date, gravmodel?: string) => tle.sgp4(thedate, gravmodel)
 
