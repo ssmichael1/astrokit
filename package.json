@@ -36,9 +36,11 @@
   },
   "scripts": {
     "test": "tape 'test/**/*-test.js' && eslint src",
-    "build": "rm -rf dist && mkdir dist && rollup --config",
-    "build:min": "npm run build && uglifyjs  dist/astrokit.js -c -m -o dist/astrokit.min.js",
-    "prepare": "npm run build:min"
+    "build:es6": "rm -rf dist && mkdir -p dist/src && tsc",
+    "build:umd": "npm run build:es6 && rollup--config",
+    "build:min": "npm run build:umd && uglifyjs  dist/astrokit.js -c -m -o dist/astrokit.min.js",
+    "build": "npm run build:min",
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "@rollup/plugin-json": "^4.1.0",
@@ -59,6 +61,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "tape": "^5.3.1",
     "topojson-client": "^3.1.0",
+    "typescript": "^4.5.4",
     "uglify-js": "^3.14.2",
     "url": "^0.11.0",
     "world-atlas": "^2.0.2"

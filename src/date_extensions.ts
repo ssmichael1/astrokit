@@ -5,80 +5,124 @@
  * to Julian dates and modified Julian dates, as well as
  * handle conversion between different time scales
  *
- */
+*/
+type timescale = 'UTC' | 'TT' | 'TAI' | 'GPS';
 
-Date.timescale = {
-    UTC: 'UTC',
-    TT: 'TT',
-    TAI: 'TAI',
-    GPS: 'GPS'
+
+enum ts {
+    UTC,
+    TT,
+    TAI,
+    GPS
 }
 
+
+declare global {
+    interface Date {
+        timescale: ts;
+        mjd: (ts?: timescale) => number;
+        jd: (ts?: timescale) => number;
+
+    }
+}
+
+
+// Julian date at given time scale (Default is UTC)
+Date.prototype.jd = function (ts?: timescale) {
+    let timeshift_seconds = 0
+    if (ts == undefined) {
+        ts = 'UTC'
+    }
+    else if (ts == 'TAI') {
+        timeshift_seconds = utc2tai(this)
+    }
+    else if (ts == 'TT') {
+        timeshift_seconds = utc2tai(this) + 32.184
+    }
+    else if (ts == 'GPS') {
+        const utcgps0 = new Date(Date.UTC(1980, 0, 6))
+        if (this > utcgps0)
+            timeshift_seconds = utc2tai(this) - 19
+    }
+    return ((this.valueOf() + timeshift_seconds * 1000) / 86400000)
+        + 2440587.5
+}
+
+
+// Modified julian date at given time scale (Default is UTC)
+Date.prototype.mjd = function (ts?: timescale): number {
+    return this.jd(ts) - 2400000.5
+}
 // Difference between TAI and UTC
 // See Table 3.1, Explanatory Supplement to the Astronomical Almanac
 // (page 87)
-const deltaAT = [
+interface deltaattype {
+    'time': number,
+    'dt': (x: Date) => number;
+}
+
+const deltaAT: Array<deltaattype> = [
     // 1961-01-01T00:00:00.000Z
     {
         'time': -283996800000,
-        'dt': (x) => { 1.422828 + 0.001296 * (x.mjd() - 37300) }
+        'dt': (x: Date) => (1.422828 + 0.001296 * (x.mjd() - 37300))
     },
     // 1961-08-01T00:00:00.000Z
-    { 'time': -265680000000, 'dt': (x) => { 1.372818 + 0.001296 * (x.mjd() - 37300) } },
+    { 'time': -265680000000, 'dt': (x: Date) => (1.372818 + 0.001296 * (x.mjd() - 37300)) },
     // 1962-01-01T00:00:00.000Z
     {
         'time': -252460800000,
-        'dt': (x) => { 1.845858 + 0.0011232 * (x.mjd() - 37665) }
+        'dt': (x: Date) => (1.845858 + 0.0011232 * (x.mjd() - 37665))
     },
     // 1963-11-01T00:00:00.000Z
     {
         'time': -194659200000,
-        'dt': (x) => { 1.945858 + 0.0011232 * (x.mjd() - 37665) }
+        'dt': (x: Date) => (1.945858 + 0.0011232 * (x.mjd() - 37665))
     },
     // 1964-01-01T00:00:00.000Z
     {
         'time': -189388800000,
-        'dt': (x) => { 3.240130 + 0.001296 * (x.mjd() - 38395) }
+        'dt': (x: Date) => (3.240130 + 0.001296 * (x.mjd() - 38395))
     },
     // 1964-04-01T00:00:00.000Z
     {
         'time': -181526400000,
-        'dt': (x) => { 3.340130 + 0.001296 * (x.mjd() - 38486) }
+        'dt': (x: Date) => (3.340130 + 0.001296 * (x.mjd() - 38486))
     },
     // 1964-09-01T00:00:00.000Z
     {
         'time': -168307200000,
-        'dt': (x) => { 3.440130 + 0.001296 * (x.mjd() - 38639) }
+        'dt': (x: Date) => (3.440130 + 0.001296 * (x.mjd() - 38639))
     },
     // 1965-01-01T00:00:00.000Z
     {
         'time': -157766400000,
-        'dt': (x) => { 3.540130 + 0.001296 * (x.mjd() - 38761) }
+        'dt': (x: Date) => (3.540130 + 0.001296 * (x.mjd() - 38761))
     },
     // 1965-03-01T00:00:00.000Z
     {
         'time': -152668800000,
-        'dt': (x) => { 3.640130 + 0.001296 * (x.mjd() - 38820) }
+        'dt': (x: Date) => (3.640130 + 0.001296 * (x.mjd() - 38820))
     },
     // 1965-07-01T00:00:00.000Z
     {
         'time': -142128000000,
-        'dt': (x) => { 3.740130 + 0.001296 * (x.mjd() - 38942) }
+        'dt': (x: Date) => (3.740130 + 0.001296 * (x.mjd() - 38942))
     },
     // 1965-09-01T00:00:00.000Z
     {
         'time': -136771200000,
-        'dt': (x) => { 3.840130 + 0.001296 * (x.mjd() - 39004) }
+        'dt': (x: Date) => (3.840130 + 0.001296 * (x.mjd() - 39004))
     },
     // 1966-01-01T00:00:00.000Z
     {
         'time': -126230400000,
-        'dt': (x) => { 4.313170 + 0.002592 * (x.mjd() - 39126) }
+        'dt': (x: Date) => (4.313170 + 0.002592 * (x.mjd() - 39126))
     },
     // 1968-02-01T00:00:00.000Z
     {
         'time': -60480000000,
-        'dt': (x) => { 4.213170 + 0.002592 * (x.mjd() - 39126) }
+        'dt': (x: Date) => (4.213170 + 0.002592 * (x.mjd() - 39126))
     },
     // 1972-01-01T00:00:00.000Z
     { 'time': 63072000000, 'dt': () => 10 },
@@ -139,7 +183,7 @@ const deltaAT = [
 ]
 
 // Compute time difference between UTC & TAI at the given time
-let utc2tai = (t) => {
+let utc2tai = (t: Date): number => {
     let idx = deltaAT.findIndex((x) => x.time > t.valueOf())
     if (idx > 0)
         return deltaAT[idx - 1].dt(t)
@@ -147,35 +191,13 @@ let utc2tai = (t) => {
         return 0
 }
 
-export const jd2Date = function (jdUTC) {
+export const jd2Date = function (jdUTC: number) {
 
     return new Date((jdUTC - 2440587.5) * 86400 * 1000)
 }
 
-// Julian date at given time scale (Default is UTC)
-Date.prototype.jd = function (ts) {
-    let timeshift_seconds = 0
-    if (ts == undefined) {
-        ts = Date.timescale.UTC
-    }
-    else if (ts == Date.timescale.TAI) {
-        timeshift_seconds = utc2tai(this)
-    }
-    else if (ts == Date.timescale.TT) {
-        timeshift_seconds = utc2tai(this) + 32.184
-    }
-    else if (ts == Date.timescale.GPS) {
-        const utcgps0 = new Date(Date.UTC(1980, 0, 6))
-        if (this > utcgps0)
-            timeshift_seconds = utc2tai(this) - 19
-    }
-    return ((this.valueOf() + timeshift_seconds * 1000) / 86400000)
-        + 2440587.5
-}
 
-// Modified julian date at given time scale (Default is UTC)
-Date.prototype.mjd = function (ts) {
-    return this.jd(ts) - 2400000.5
-}
+
+
 
 

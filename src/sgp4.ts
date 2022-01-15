@@ -84,7 +84,7 @@
 const pi = Math.PI
 const twopi = Math.PI * 2
 const deg2rad = Math.PI / 180.0
-const fmod = (a, b) => (a % b)
+const fmod = (a: number, b: number): number => (a % b)
 //const fmod = function (a, b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(12)); };
 //const help = 'n'
 const cos = Math.cos
@@ -92,7 +92,7 @@ const sin = Math.sin
 //const tan = Math.tan
 const atan2 = Math.atan2
 const sqrt = Math.sqrt
-const pow = (a, b) => Math.pow(a, b)
+const pow = (a: number, b: number): number => Math.pow(a, b)
 const floor = Math.floor
 const fabs = Math.abs
 
@@ -128,7 +128,7 @@ double  gstime_SGP4
 	double jdut1
 )
 */
-const gstime_SGP4 = (jdut1) => {
+const gstime_SGP4 = (jdut1: number): number => {
 	let tut1 = (jdut1 - 2451545.0) / 36525.0;
 	let temp = -6.2e-6 * tut1 * tut1 * tut1 + 0.093104 * tut1 * tut1 +
 		(876600.0 * 3600 + 8640184.812866) * tut1 + 67310.54841;  // sec
@@ -175,7 +175,7 @@ const gstime_SGP4 = (jdut1) => {
 
 
 
-export const getgravconst = (whichconst, satrec) => {
+export const getgravconst = (whichconst: string, satrec: any): void => {
 
 	switch (whichconst) {
 		// -- wgs-72 low precision str#3 constants --
@@ -303,15 +303,15 @@ static void dpper
 	char opsmode
 )
 */
-const dpper = (e3, ee2, peo, pgho, pho,
-	pinco, plo, se2, se3, sgh2,
-	sgh3, sgh4, sh2, sh3, si2,
-	si3, sl2, sl3, sl4, t,
-	xgh2, xgh3, xgh4, xh2, xh3,
-	xi2, xi3, xl2, xl3, xl4,
-	zmol, zmos, inclo,
-	init, ep, inclp, nodep, argpp, mp,
-	opsmode) => {
+const dpper = (e3: number, ee2: number, peo: number, pgho: number, pho: number,
+	pinco: number, plo: number, se2: number, se3: number, sgh2: number,
+	sgh3: number, sgh4: number, sh2: number, sh3: number, si2: number,
+	si3: number, sl2: number, sl3: number, sl4: number, t: number,
+	xgh2: number, xgh3: number, xgh4: number, xh2: number, xh3: number,
+	xi2: number, xi3: number, xl2: number, xl3: number, xl4: number,
+	zmol: number, zmos: number, inclo: number,
+	init: string, ep: number, inclp: number, nodep: number, argpp: number, mp: number,
+	opsmode: string): any => {
 	/* --------------------- local variables ------------------------ */
 
 	/* c++ comment out 
@@ -522,17 +522,24 @@ const dpper = (e3, ee2, peo, pgho, pho,
 		double & zmos
 	)
 	*/
-const dscom = (epoch, ep, argpp, tc, inclp,
-	nodep, np,
-	snodm, cnodm, sinim, cosim, sinomm,
-	cosomm, day, e3, ee2, em, emsq, gam, peo, pgho, pho,
-	pinco, plo, rtemsq, se2, se3, sgh2, sgh3, sgh4, sh2, sh3,
-	si2, si3, sl2, sl3, sl4, s1, s2, s3, s4, s5,
-	s6, s7, ss1, ss2, ss3, ss4, ss5, ss6, ss7, sz1,
-	sz2, sz3, sz11, sz12, sz13, sz21, sz22, sz23, sz31, sz32,
-	sz33, xgh2, xgh3, xgh4, xh2, xh3, xi2, xi3, xl2, xl3,
-	xl4, nm, z1, z2, z3, z11, z12, z13, z21, z22,
-	z23, z31, z32, z33, zmol, zmos) => {
+const dscom = (epoch: number, ep: number, argpp: number, tc: number, inclp: number,
+	nodep: number, np: number,
+	snodm: number, cnodm: number, sinim: number, cosim: number, sinomm: number,
+	cosomm: number, day: number, e3: number, ee2: number, em: number, emsq: number, gam: number, peo: number,
+	pgho: number, pho: number,
+	pinco: number, plo: number, rtemsq: number, se2: number,
+	se3: number, sgh2: number, sgh3: number, sgh4: number, sh2: number, sh3: number,
+	si2: number, si3: number, sl2: number, sl3: number, sl4: number,
+	s1: number, s2: number, s3: number, s4: number, s5: number,
+	s6: number, s7: number, ss1: number, ss2: number,
+	ss3: number, ss4: number, ss5: number, ss6: number, ss7: number, sz1: number,
+	sz2: number, sz3: number, sz11: number, sz12: number,
+	sz13: number, sz21: number, sz22: number, sz23: number, sz31: number, sz32: number,
+	sz33: number, xgh2: number, xgh3: number, xgh4: number, xh2: number, xh3: number,
+	xi2: number, xi3: number, xl2: number, xl3: number,
+	xl4: number, nm: number, z1: number, z2: number,
+	z3: number, z11: number, z12: number, z13: number, z21: number, z22: number,
+	z23: number, z31: number, z32: number, z33: number, zmol: number, zmos: number): any => {
 	/* -------------------------- constants ------------------------- */
 	/* c++ comment out 
 	const double zes = 0.01675;
@@ -855,17 +862,22 @@ const dscom = (epoch, ep, argpp, tc, inclp,
 		double & xfact, double & xlamo, double & xli, double & xni
 	)
 	*/
-const dsinit = (xke,
-	cosim, emsq, argpo, s1, s2, s3, s4, s5, sinim, ss1,
-	ss2, ss3, ss4, ss5, sz1, sz3, sz11, sz13, sz21, sz23,
-	sz31, sz33, t, tc, gsto, mo, mdot, no, nodeo, nodedot,
-	xpidot, z1, z3, z11, z13, z21, z23, z31, z33, ecco,
-	eccsq, em, argpm, inclm, mm, nm, nodem,
-	irez, atime, d2201, d2211, d3210, d3222,
-	d4410, d4422, d5220, d5232, d5421,
-	d5433, dedt, didt, dmdt, dndt,
-	dnodt, domdt, del1, del2, del3,
-	xfact, xlamo, xli, xni) => {
+const dsinit = (xke: number,
+	cosim: number, emsq: number, argpo: number, s1: number, s2: number,
+	s3: number, s4: number, s5: number, sinim: number, ss1: number,
+	ss2: number, ss3: number, ss4: number, ss5: number, sz1: number, sz3: number, sz11: number,
+	sz13: number, sz21: number, sz23: number,
+	sz31: number, sz33: number, t: number, tc: number, gsto: number, mo: number,
+	mdot: number, no: number, nodeo: number, nodedot: number,
+	xpidot: number, z1: number, z3: number, z11: number,
+	z13: number, z21: number, z23: number, z31: number, z33: number, ecco: number,
+	eccsq: number, em: number, argpm: number, inclm: number,
+	mm: number, nm: number, nodem: number,
+	irez: number, atime: number, d2201: number, d2211: number, d3210: number, d3222: number,
+	d4410: number, d4422: number, d5220: number, d5232: number, d5421: number,
+	d5433: number, dedt: number, didt: number, dmdt: number, dndt: number,
+	dnodt: number, domdt: number, del1: number, del2: number, del3: number,
+	xfact: number, xlamo: number, xli: number, xni: number) => {
 	/* --------------------- local variables ------------------------ */
 
 	/* c++ comment out 
@@ -1170,12 +1182,13 @@ static void dspace
 )
 */
 
-const dspace = (irez, d2201, d2211, d3210, d3222, d4410,
-	d4422, d5220, d5232, d5421, d5433,
-	dedt, del1, del2, del3, didt, dmdt, dnodt, domdt, argpo, argpdot,
-	t, tc, gsto, xfact, xlamo, no,
-	atime, em, argpm, inclm, xli,
-	mm, xni, nodem, dndt, nm) => {
+const dspace = (irez: number, d2201: number, d2211: number, d3210: number, d3222: number, d4410: number,
+	d4422: number, d5220: number, d5232: number, d5421: number, d5433: number,
+	dedt: number, del1: number, del2: number, del3: number,
+	didt: number, dmdt: number, dnodt: number, domdt: number, argpo: number, argpdot: number,
+	t: number, tc: number, gsto: number, xfact: number, xlamo: number, no: number,
+	atime: number, em: number, argpm: number, inclm: number, xli: number,
+	mm: number, xni: number, nodem: number, dndt: number, nm: number): any => {
 	/* c++ comment out 
 	const double twopi = 2.0 * pi;
 		int iretn, iret;
@@ -1382,13 +1395,12 @@ const dspace = (irez, d2201, d2211, d3210, d3222, d4410,
 	)
 */
 
-const initl = (xke, j2,
-	ecco, epoch, inclo, no_kozai, opsmode,
-	method, ainv, ao, con41, con42, cosio,
-	cosio2, eccsq, omeosq, posq,
-	rp, rteosq, sinio, gsto, no_unkozai) => {
+function initl(xke: number, j2: number,
+	ecco: number, epoch: number, inclo: number, no_kozai: number, opsmode: string,
+	method: string, ainv: number, ao: number, con41: number, con42: number, cosio: number,
+	cosio2: number, eccsq: number, omeosq: number, posq: number,
+	rp: number, rteosq: number, sinio: number, gsto: number, no_unkozai: number): any {
 	/* --------------------- local variables ------------------------ */
-
 	/* c++ comment out
 	ak, d1, del, adel, po, x2o3;
 
@@ -1405,53 +1417,53 @@ const initl = (xke, j2,
 	// sgp4fix identify constants and allow alternate values
 	// only xke and j2 are used here so pass them in directly
 	// getgravconst( whichconst, tumin, mu, radiusearthkm, xke, j2, j3, j4, j3oj2 );
-	const x2o3 = 2.0 / 3.0;
+	const x2o3 = 2.0 / 3.0
 
 	/* ------------- calculate auxillary epoch quantities ---------- */
-	eccsq = ecco * ecco;
-	omeosq = 1.0 - eccsq;
-	rteosq = sqrt(omeosq);
-	cosio = cos(inclo);
-	cosio2 = cosio * cosio;
+	eccsq = ecco * ecco
+	omeosq = 1.0 - eccsq
+	rteosq = sqrt(omeosq)
+	cosio = cos(inclo)
+	cosio2 = cosio * cosio
 
 	/* ------------------ un-kozai the mean motion ----------------- */
-	ak = pow(xke / no_kozai, x2o3);
-	d1 = 0.75 * j2 * (3.0 * cosio2 - 1.0) / (rteosq * omeosq);
-	del = d1 / (ak * ak);
+	ak = pow(xke / no_kozai, x2o3)
+	d1 = 0.75 * j2 * (3.0 * cosio2 - 1.0) / (rteosq * omeosq)
+	del = d1 / (ak * ak)
 	adel = ak * (1.0 - del * del - del *
-		(1.0 / 3.0 + 134.0 * del * del / 81.0));
-	del = d1 / (adel * adel);
-	no_unkozai = no_kozai / (1.0 + del);
+		(1.0 / 3.0 + 134.0 * del * del / 81.0))
+	del = d1 / (adel * adel)
+	no_unkozai = no_kozai / (1.0 + del)
 
-	ao = pow(xke / (no_unkozai), x2o3);
-	sinio = sin(inclo);
-	po = ao * omeosq;
-	con42 = 1.0 - 5.0 * cosio2;
-	con41 = -con42 - cosio2 - cosio2;
-	ainv = 1.0 / ao;
-	posq = po * po;
-	rp = ao * (1.0 - ecco);
-	method = 'n';
+	ao = pow(xke / (no_unkozai), x2o3)
+	sinio = sin(inclo)
+	po = ao * omeosq
+	con42 = 1.0 - 5.0 * cosio2
+	con41 = -con42 - cosio2 - cosio2
+	ainv = 1.0 / ao
+	posq = po * po
+	rp = ao * (1.0 - ecco)
+	method = 'n'
 
 	// sgp4fix modern approach to finding sidereal time
 	//   if (opsmode == 'a')
 	//      {
 	// sgp4fix use old way of finding gst
 	// count integer number of days from 0 jan 1970
-	ts70 = epoch - 7305.0;
-	ds70 = floor(ts70 + 1.0e-8);
-	tfrac = ts70 - ds70;
+	ts70 = epoch - 7305.0
+	ds70 = floor(ts70 + 1.0e-8)
+	tfrac = ts70 - ds70
 	// find greenwich location at epoch
-	c1 = 1.72027916940703639e-2;
-	thgr70 = 1.7321343856509374;
-	fk5r = 5.07551419432269442e-15;
-	c1p2p = c1 + twopi;
-	let gsto1 = fmod(thgr70 + c1 * ds70 + c1p2p * tfrac + ts70 * ts70 * fk5r, twopi);
+	c1 = 1.72027916940703639e-2
+	thgr70 = 1.7321343856509374
+	fk5r = 5.07551419432269442e-15
+	c1p2p = c1 + twopi
+	let gsto1 = fmod(thgr70 + c1 * ds70 + c1p2p * tfrac + ts70 * ts70 * fk5r, twopi)
 	if (gsto1 < 0.0)
-		gsto1 = gsto1 + twopi;
+		gsto1 = gsto1 + twopi
 	//    }
 	//    else
-	gsto = gstime_SGP4(epoch + 2433281.5);
+	gsto = gstime_SGP4(epoch + 2433281.5)
 
 	return {
 		method, ainv, ao, con41, con42, cosio,
@@ -1556,7 +1568,7 @@ const initl = (xke, j2,
 		double r[3], double v[3]	
 	)
 */
-export const sgp4 = (satrec, tsince) => {
+export const sgp4 = (satrec: any, tsince: number): any => {
 
 	let r = [0, 0, 0]
 	let v = [0, 0, 0]
@@ -1968,10 +1980,10 @@ const double xinclo, const double xmo, const double xno_kozai,
 const double xnodeo, elsetrec& satrec
 		)
 		*/
-export const sgp4init = (whichconst, opsmode, satn, epoch,
-	xbstar, xndot, xnddot, xecco, xargpo,
-	xinclo, xmo, xno_kozai,
-	xnodeo, satrec) => {
+export const sgp4init = (whichconst: string, opsmode: string, satn: string, epoch: number,
+	xbstar: number, xndot: number, xnddot: number, xecco: number, xargpo: number,
+	xinclo: number, xmo: number, xno_kozai: number,
+	xnodeo: number, satrec: any): any => {
 	/* --------------------- local variables ------------------------ */
 	/* c++ comment out 
 	double ao, ainv, con42, cosio, sinio, cosio2, eccsq,

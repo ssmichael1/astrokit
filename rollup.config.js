@@ -9,7 +9,7 @@ const copyright = readFileSync("./LICENSE", "utf-8")
     .join(", ");
 
 export default {
-    input: "src/index.js",
+    input: "dist/src/index.js",
     output: {
         file: `dist/${meta.name}.js`,
         name: "ak",

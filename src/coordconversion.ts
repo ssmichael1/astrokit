@@ -12,7 +12,7 @@
  *
  */
 
-import Quaternion from './quaternion.js';
+import { default as Quaternion, Vec3 } from './quaternion';
 import './date_extensions.js'
 
 const deg2rad = Math.PI / 180.0
@@ -23,7 +23,7 @@ const deg2rad = Math.PI / 180.0
  * @param {Number} jd_ut1 The Julian date, referenced to UT1
  * @returns {Number} Greenwich mean sidereal time, radians
  */
-export const gmst = (jd_ut1) => {
+export const gmst = (jd_ut1: number): number => {
     // Convert seconds to radians
     // Expression below gives gmst in seconds
     let tut1 = (jd_ut1 - 2451545.0) / 36525.0
@@ -45,7 +45,7 @@ export const gmst = (jd_ut1) => {
  * @param {Number} jd_ut1 the Julian date, referenced to UT1
  * @returns {Number} Greenwich apparant sideral time, radians
  */
-export const gast = (jd_ut1) => {
+export const gast = (jd_ut1: number): number => {
     // Compute equation of equinoxes
     let t = jd_ut1 - 2451545.0
     const deg2rad = Math.PI / 180.
@@ -70,8 +70,8 @@ export const gast = (jd_ut1) => {
  * @param {Date} thedate Date for which to compute rotation
  * @returns {Quaternion} Quaternion representing the rotation
  */
-export const qTEME2ITRF = (thedate) => {
-    return Quaternion.rotz(gmst(thedate.jd(Date.timescale.UTC)))
+export const qTEME2ITRF = (thedate: Date): Quaternion => {
+    return Quaternion.rotz(gmst(thedate.jd()))
 }
 
 /**
@@ -84,8 +84,8 @@ export const qTEME2ITRF = (thedate) => {
  * @param {Date} thedate Date for which to compute rotation
  * @returns {Quaternion} Quaternion representing the rotation
  */
-export const qGCRS2ITRF = (thedate) => {
-    let t = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
+export const qGCRS2ITRF = (thedate: Date): Quaternion => {
+    let t = (thedate.jd('UTC') - 2451545.0) / 36525.0
 
     // Compute precession rotation
     let zeta = 2.650545
@@ -139,7 +139,7 @@ export const qGCRS2ITRF = (thedate) => {
 
     // gast should take as input jd in UT1 time base, but UTC
     // is close enough for our purposes
-    let qGast = Quaternion.rotz(-gast(thedate.jd(Date.timescale.UTC)))
+    let qGast = Quaternion.rotz(-gast(thedate.jd('UTC')))
 
     let q = Quaternion.mult(qP, Quaternion.mult(qN, qGast))
     return q.conj()

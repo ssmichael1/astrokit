@@ -24,22 +24,17 @@ const wgs84_f = 0.003352810664747
 const rad2deg = 180.0 / Math.PI
 const deg2rad = Math.PI / 180.0
 
-if (inspect == undefined)
-    var inspect = Symbol.for('nodejs.util.inspect.custom');
+var inspect = Symbol.for('nodejs.util.inspect.custom');
 
-import Quaternion from './quaternion.js'
+import { default as Quaternion, Vec3 } from './quaternion'
+import 'astroutil'
 
 export default class ITRFCoord {
-    constructor(x, y, z) {
-        if (x == undefined) {
-            this.raw = [0, 0, 0]
-            return this
-        }
-        if (y == undefined) {
-            this.raw = x
-            return this
-        }
-        this.raw = [x, y, z]
+
+    raw: Vec3;
+
+    constructor(x?: number, y?: number, z?: number) {
+        this.raw = [x ?? 0, y ?? 0, z ?? 0]
     }
 
 
@@ -48,13 +43,13 @@ export default class ITRFCoord {
      * Create ITRFCoord object from input 
      * geodetic coordinates
      * 
-     * @param {Number} lat Latitude in radians
-     * @param {Number} lon Longitude in radians
-     * @param {Number} hae Height above ellipsoid
+     * @param lat Latitude in radians
+     * @param lon Longitude in radians
+     * @param hae Height above ellipsoid, meters
      * @returns ITRFCoord object
      */
-    static fromGeodetic(lat, lon, hae) {
-        if (hae == undefined)
+    static fromGeodetic(lat: number, lon: number, hae?: number): ITRFCoord {
+        if (hae === undefined)
             hae = 0
         let sinp = Math.sin(lat)
         let cosp = Math.cos(lat)
@@ -73,12 +68,12 @@ export default class ITRFCoord {
 
     /**
      * 
-     * @param {Number} lat_deg Latitude in degrees
-     * @param {Number} lon_deg Longitude in degrees
-     * @param {Number} hae height above ellipsoid, meters
-     * @returns 
+     * @param lat_deg Latitude in degrees
+     * @param lon_deg Longitude in degrees
+     * @param hae height above ellipsoid, meters
+     * @returns new ITRF Coordinate
      */
-    static fromGeodticDeg(lat_deg, lon_deg, hae) {
+    static fromGeodticDeg(lat_deg: number, lon_deg: number, hae?: number): ITRFCoord {
         const deg2rad = Math.PI / 180.
         return ITRFCoord.fromGeodetic(lat_deg * deg2rad, lon_deg * deg2rad, hae)
     }
@@ -88,7 +83,7 @@ export default class ITRFCoord {
      * 
      * @returns Height above WGS84 ellipsoid, meters
      */
-    height() {
+    height(): number {
         let e2 = 1.0 - (1.0 - wgs84_f) * (1.0 - wgs84_f)
         let phi = this.latitude()
         let sinphi = Math.sin(phi)
@@ -104,7 +99,7 @@ export default class ITRFCoord {
      * 
      * @returns Geodetic longitude, radians
      */
-    longitude() {
+    longitude(): number {
         return Math.atan2(this.raw[1], this.raw[0])
     }
 
@@ -112,7 +107,7 @@ export default class ITRFCoord {
      * 
      * @returns Geodetic latitude, radians
      */
-    latitude() {
+    latitude(): number {
         let e2 = 1.0 - (1.0 - wgs84_f) * (1.0 - wgs84_f)
         let ep2 = e2 / (1.0 - e2)
         let b = wgs84_a * (1.0 - wgs84_f)
@@ -153,7 +148,7 @@ export default class ITRFCoord {
      *          Terrestrial Reference Frame (ITRF)
      *          at this location
      */
-    qNED2ITRF() {
+    qNED2ITRF(): Quaternion {
         let lat = this.latitude()
         let lon = this.longitude()
         return Quaternion.mult(
@@ -168,7 +163,7 @@ export default class ITRFCoord {
      *          Terrestrial Reference Frame (ITRF)
      *          at this location
      */
-    qENU2ITRF() {
+    qENU2ITRF(): Quaternion {
         let lat = this.latitude()
         let lon = this.longitude()
         return Quaternion.mult(
@@ -182,7 +177,7 @@ export default class ITRFCoord {
      * @param {ITRFCoord} ref Reference coordinate
      * @returns East-North-Up vector relative to input reference, meters
      */
-    toENU(ref) {
+    toENU(ref: ITRFCoord): Vec3 {
         let lat = ref.latitude()
         let lon = ref.longitude()
         let q = Quaternion.mult(
@@ -201,7 +196,7 @@ export default class ITRFCoord {
      * @param {ITRFCoord} ref Reference coordinate
      * @returns North-East-Down vector relative to input reference, meters
      */
-    toNED(ref) {
+    toNED(ref: ITRFCoord): Vec3 {
         return ref.qNED2ITRF().conj().rotate(
             [this.raw[0] - ref.raw[0],
             this.raw[1] - ref.raw[1],
@@ -218,7 +213,7 @@ export default class ITRFCoord {
      * @param {Number} hae Height above ellipsoid
      * @returns ITRFCoord object
      */
-    static fromGeodeticDeg(lat, lon, hae) {
+    static fromGeodeticDeg(lat: number, lon: number, hae: number): ITRFCoord {
         return this.fromGeodetic(lat * Math.PI / 180, lon * Math.PI / 180, hae)
     }
 
@@ -226,7 +221,7 @@ export default class ITRFCoord {
      * 
      * @returns Longitude in degrees
      */
-    longitude_deg() {
+    longitude_deg(): number {
         return this.longitude() * 180.0 / Math.PI
     }
 
@@ -234,21 +229,21 @@ export default class ITRFCoord {
      * 
      * @returns Latitude in degrees
      */
-    latitude_deg() {
+    latitude_deg(): number {
         return this.latitude() * 180.0 / Math.PI
     }
 
     /**
      * @returns Geocentric latitude, radians
      */
-    geocentric_latitude() {
+    geocentric_latitude(): number {
         return Math.asin(this.raw[2] / this.raw.norm())
     }
 
     /**
      * @returns Gencentric latitude, degrees
      */
-    geocentric_latitude_deg() {
+    geocentric_latitude_deg(): number {
         return Math.asin(this.raw[2] / this.raw.norm()) * rad2deg
     }
 
@@ -256,14 +251,14 @@ export default class ITRFCoord {
      * 
      * @returns string description of coordinate
      */
-    toString() {
+    toString(): string {
         return `ITRFCoord(Latitude = ${this.latitude_deg().toFixed(3)} deg, `
             + `Longitude = ${this.longitude_deg().toFixed(3)} deg, `
             + `Height = ${this.height().toFixed(0)} m)`
     }
 
 
-    [inspect]() {
+    [inspect](): string {
         return this.toString();
     }
 }
