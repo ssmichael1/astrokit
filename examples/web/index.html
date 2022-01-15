@@ -378,7 +378,7 @@
         // Ground speed in Earth-fixed frame
         // Must account for rotation of Earth
         let omega_earth = [0, 0, ak.univ.omega_earth]
-        let efix = omega_earth.cross(curpos.itrf.raw)
+        let efix = ak.cross(omega_earth, curpos.itrf.raw)
         gndspd = q.rotate(rv.v)
         gndspd[0] = gndspd[0] - efix[0]
         gndspd[1] = gndspd[1] - efix[1]

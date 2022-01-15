@@ -1,8 +1,9 @@
-import { sind, cosd } from './util.js'
+import { sind, cosd } from './astroutil.js'
 import { gmst } from './coordconversion.js'
-import { default as ITRFCoord } from './itrfcoord.js'
 import { jd2Date } from './date_extensions.js'
-import { univ } from './lpephemeris.js'
+import { univ } from './univ.js'
+import { Vec3 } from './quaternion.js'
+import { default as ITRFCoord } from './itrfcoord.js'
 
 const deg2rad = Math.PI / 180.
 const rad2deg = 180. / Math.PI
@@ -12,11 +13,11 @@ const rad2deg = 180. / Math.PI
  * Compute moon position in Earth-centered frame
  * Algorithm 31 from Vallado
  * 
- * @param {Date} thedate Date for which to compute position
+ * @param thedate Date for which to compute position
  * @returns 3-vector representing moon position in GCRS frame, meters
  */
-const posGCRS = (thedate) => {
-    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
+const posGCRS = (thedate: Date): Vec3 => {
+    let T = (thedate.jd('UTC') - 2451545.0) / 36525.0
     let lambda_ecliptic = 218.32 + 481267.8813 * T +
         6.29 * sind(134.9 + 477198.85 * T) -
         1.27 * sind(259.2 - 413335.38 * T) +
@@ -41,11 +42,13 @@ const posGCRS = (thedate) => {
 
     let rmag = univ.EarthRadius / sind(hparallax);
 
-    return [cosd(phi_ecliptic) * cosd(lambda_ecliptic),
+    let normpos = [cosd(phi_ecliptic) * cosd(lambda_ecliptic),
     cosd(epsilon) * cosd(phi_ecliptic) * sind(lambda_ecliptic)
     - sind(epsilon) * sind(phi_ecliptic),
     sind(epsilon) * cosd(phi_ecliptic) * sind(lambda_ecliptic)
-    + cosd(epsilon) * sind(phi_ecliptic)].map(x => x * rmag)
+    + cosd(epsilon) * sind(phi_ecliptic)]
+
+    return [normpos[0] * rmag, normpos[1] * rmag, normpos[2] * rmag]
 
 }
 
@@ -53,11 +56,11 @@ const posGCRS = (thedate) => {
  * 
  * Compute phase of moon from Vallado
  * 
- * @param {Date} thedate Date for which to compute position
+ * @param thedate Date for which to compute position
  * @returns Moon phase in radians, in range [-pi pi]
  */
-const phase = (thedate) => {
-    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
+const phase = (thedate: Date): number => {
+    let T = (thedate.jd('UTC') - 2451545.0) / 36525.0
 
 
     let lambda_ecliptic_moon = deg2rad *
@@ -91,12 +94,17 @@ const phase = (thedate) => {
 
 /**
  * 
- * @param {Date} thedate Date for which to compute fraction
+ * @param thedate Date for which to compute fraction
  * @returns Fraction of moon illuminated by sun as seen from Earth,
  *          in range [0,1]
  */
-const fractionIlluminated = (thedate) => {
+const fractionIlluminated = (thedate: Date): number => {
     return 0.5 * (1 - Math.cos(phase(thedate)))
+}
+
+type risesettype = {
+    rise: Date
+    set: Date
 }
 
 /**
@@ -104,11 +112,11 @@ const fractionIlluminated = (thedate) => {
  * riseSet
  * Return rise and set time on the given Julian date
  * 
- * @param {Date} thedate Date Object
- * @param {ITRFCoord} coord Coordinate at which to communicate rise & set
+ * @param thedate Date Object
+ * @param coord Coordinate at which to communicate rise & set
  * @returns JSON with moon rise and set times as javascript Dates
  */
-const riseSet = (thedate, coord) => {
+const riseSet = (thedate: Date, coord: ITRFCoord): risesettype => {
 
     let observer_longitude = coord.longitude()
     let observer_latitude = coord.geocentric_latitude()
@@ -204,10 +212,9 @@ const riseSet = (thedate, coord) => {
     }
 }
 
-export const moon =
-{
-    riseSet: riseSet,
+export const moon = {
+    posGCRS: posGCRS,
     phase: phase,
     fractionIlluminated: fractionIlluminated,
-    posGCRS: posGCRS
+    riseSet: riseSet
 }

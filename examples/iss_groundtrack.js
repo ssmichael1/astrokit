@@ -11,7 +11,7 @@
  */
 
 // Import the astrokit
-import * as ak from '../src/index.js'
+import * as ak from '../dist/src/index.js'
 
 // A recent (9/24/2021) TLE for the international space station
 // as downloaded from www.space-track.org
@@ -45,6 +45,7 @@ let iss_groundtrack = times.map((t) => {
     // by running "sgp4" orbit propagator with iss TLE and
     // desired time as input
     let rv = ak.sgp4(iss, t)
+    console.log(rv)
 
     // Get quaternion to rotate from TEME frame to ITRF frame
     // TEME = Earth-centered pseudo-inertial frame in which sgp4
@@ -61,6 +62,7 @@ let iss_groundtrack = times.map((t) => {
         longitude_deg: itrf.longitude_deg(),
         height_meters: itrf.height()
     }
+
 })
 // print output to screen
 console.log(iss_groundtrack)

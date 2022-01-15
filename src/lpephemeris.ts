@@ -10,8 +10,11 @@
  * 
  */
 
-import ITRFCoord from './itrfcoord.js'
-import { sind, cosd } from './util.js'
+import { sind, cosd, eadd } from './astroutil.js'
+import './date_extensions.js'
+import { Vec3 } from './quaternion.js'
+import { moon } from './lunar_calcs.js'
+import { univ } from './univ.js'
 
 /**
  * Bodies for which position can be computed
@@ -29,23 +32,9 @@ export const SolarSystemBodies =
     Pluto: "Pluto"
 }
 
-// Universal constants
-export const univ =
-{
-    AU: 1.495978706910000E11,
-    c: 299792458.0,
-    OmegaEarth: 7.292115090E-5,
-    omega_earth: 7.292115090E-5,
-    EarthRadius: 6378137,
-    earth_radius: 6378137,
-    EarthMoonMassRatio: 81.3007,
-    MoonRadius: 1737400.0,
-    moon_radius: 1737400.0,
-    MuEarth: 3.986004418E14,
-    mu_earth: 3986004418E14,
-    MuSun: 1.32712440018E20,
-    mu_sun: 1.32712440018E20,
-}
+
+
+type ssbodies = 'Mercury' | 'Venus' | 'EarthMoon' | 'Mars' | 'Jupiter' | 'Saturn' | 'Uranus' | 'Neptune' | 'Pluto';
 
 /**
  * ephemerides lookup table, pulled from the
@@ -191,12 +180,12 @@ const lpephem = {
  * @param {Date} thedate Date to compute position for
  * @returns 3-vector representing position (meters) in Heliocentric frame
  */
-export function bodyPosHelio(name, thedate) {
+export function bodyPosHelio(name: ssbodies, thedate: Date): Vec3 {
 
     // const deg2rad = Math.PI / 180.0
     const rad2deg = 180.0 / Math.PI
 
-    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
+    let T = (thedate.jd('UTC') - 2451545.0) / 36525.0
     let vals = lpephem[name];
     let a = vals[0] + vals[6] * T;
     let e = vals[1] + vals[7] * T;
@@ -243,7 +232,7 @@ export function bodyPosHelio(name, thedate) {
     let xeq = xecl;
     let yeq = cobliquity * yecl - sobliquity * zecl;
     let zeq = sobliquity * yecl + cobliquity * zecl;
-    return [xeq, yeq, zeq].map(x => x * univ.AU)
+    return [xeq * univ.AU, yeq * univ.AU, zeq * univ.AU]
 
 }
 
@@ -258,12 +247,17 @@ export function bodyPosHelio(name, thedate) {
  * @param {Date} thedate Time for which position is computed
  * @returns Solar system body position in Earth-centered frame
  */
-export const bodyPosGCRS = (body, thedate) => {
-    return bodyPosHelio(body, thedate).eadd(
-        bodyPosHelio(SolarSystemBodies.EarthMoon, thedate)
-            .map(x => -1 * x)
-            .eadd(moonPosGCRS(thedate)
-                .map(x => x / (1.0 + univ.EarthMoonMassRatio))))
+export const bodyPosGCRS = (body: ssbodies, thedate: Date): Vec3 => {
+
+    let bh = bodyPosHelio(body, thedate)
+    let em = bodyPosHelio('EarthMoon', thedate)
+    let mp = moon.posGCRS(thedate)
+    let div = 1.0 / (1.0 + univ.EarthMoonMassRatio)
+
+    return [bh[0] - em[0] + mp[0] * div,
+    bh[1] - em[1] + mp[1] * div,
+    bh[2] - em[2] + mp[2] * div]
+
 
 }
 

@@ -6,7 +6,7 @@
 
 // Include the "astrokit"
 
-import * as ak from '../src/index.js'
+import * as ak from '../dist/src/index.js'
 import tape from 'tape'
 
 

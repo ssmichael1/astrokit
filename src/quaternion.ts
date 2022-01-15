@@ -27,24 +27,23 @@
  */
 
 
-if (inspect == undefined) {
-    var inspect = Symbol.for('nodejs.util.inspect.custom');
-}
+var inspect = Symbol.for('nodejs.util.inspect.custom');
 
+export type Vec3 = [number, number, number];
+export type Vec4 = [number, number, number, number];
 
 export default class Quaternion {
-    constructor(x, y, z, w) {
+
+    raw: Vec4;
+
+    constructor(x?: number, y?: number, z?: number, w?: number) {
         // No arguments, return unit quaternion
         if (x == undefined) {
             this.raw = [0, 0, 0, 1]
             return this
         }
-        // Input is 4-element array
-        if (y == undefined) {
-            this.raw = x
-            return this
-        }
-        this.raw = [x, y, z, w]
+
+        this.raw = [x ?? 0, y ?? 0, z ?? 0, w ?? 1]
     }
 
     /**
@@ -54,7 +53,7 @@ export default class Quaternion {
      * @param {Quaternion} b 
      * @returns {Quaternion} a * b
      */
-    static mult(a, b) {
+    static mult(a: Quaternion, b: Quaternion): Quaternion {
         return new Quaternion(
             b.raw[3] * a.raw[0] + b.raw[0] * a.raw[3] +
             b.raw[1] * a.raw[2] - b.raw[2] * a.raw[1],
@@ -77,7 +76,7 @@ export default class Quaternion {
      * 
      * @param {Quaternion} a 
      */
-    mult(a) {
+    mult(a: Quaternion): void {
         this.raw =
             [a.raw[3] * this.raw[0] + a.raw[0] * this.raw[3] +
                 a.raw[1] * this.raw[2] - a.raw[2] * this.raw[1],
@@ -102,7 +101,7 @@ export default class Quaternion {
      * @param {Array length=3} v 
      * @returns {Array length=3} rotated vector
      */
-    static rotate(q, v) {
+    static rotate(q: Quaternion, v: Vec3): Vec3 {
         return q.rotate(v)
     }
 
@@ -112,8 +111,8 @@ export default class Quaternion {
      * @param {Array length=3} v 
      * @returns {Array length=3} rotated vector
      */
-    rotate(v) {
-        let qv = new Quaternion([v[0], v[1], v[2], 0])
+    rotate(v: Vec3): Vec3 {
+        let qv = new Quaternion(v[0], v[1], v[2], 0)
         let vnew = Quaternion.mult(this, Quaternion.mult(qv, this.conj()))
         return [vnew.raw[0], vnew.raw[1], vnew.raw[2]]
     }
@@ -122,7 +121,7 @@ export default class Quaternion {
      * 
      * @returns {Quaternion} unit quaternion
      */
-    static identity() {
+    static identity(): Quaternion {
         return new Quaternion(0, 0, 0, 1);
     }
 
@@ -134,7 +133,7 @@ export default class Quaternion {
      * @param {Number} theta Angle to rotate, in radians
      * @returns {Quaternion}
      */
-    static rotx(theta) {
+    static rotx(theta: number): Quaternion {
         let c2 = Math.cos(theta / 2.0)
         let s2 = Math.sin(theta / 2.0)
         return new Quaternion(s2, 0, 0, c2)
@@ -148,7 +147,7 @@ export default class Quaternion {
      * @param {Number} theta Angle to rotate, in radians
      * @returns {Quaternion}
      */
-    static roty(theta) {
+    static roty(theta: number): Quaternion {
         let c2 = Math.cos(theta / 2.0)
         let s2 = Math.sin(theta / 2.0)
         return new Quaternion(0, s2, 0, c2)
@@ -162,7 +161,7 @@ export default class Quaternion {
      * @param {Number} theta Angle to rotate, in radians
      * @returns {Quaternion}
      */
-    static rotz(theta) {
+    static rotz(theta: number): Quaternion {
         let c2 = Math.cos(theta / 2.0)
         let s2 = Math.sin(theta / 2.0)
         return new Quaternion(0, 0, s2, c2)
@@ -172,22 +171,22 @@ export default class Quaternion {
      * 
      * @returns {Quaternion} Conjugate of quaternion
      */
-    conjugate() {
-        return new Quaternion([-this.raw[0], -this.raw[1],
-        -this.raw[2], this.raw[3]])
+    conjugate(): Quaternion {
+        return new Quaternion(-this.raw[0], -this.raw[1],
+            -this.raw[2], this.raw[3])
     }
     /**
      * 
      * @returns {Quaternion} Conjugate of quaternion
      */
-    conj() { return this.conjugate() }
+    conj(): Quaternion { return this.conjugate() }
 
 
     /**
      * 
      * @returns {Number} Angle of rotation of quaternion, radians
      */
-    angle() {
+    angle(): number {
         let a = Math.acos(this.raw[3]) * 2.0
         return a
     }
@@ -196,7 +195,7 @@ export default class Quaternion {
      * 
      * @returns {Number} Angle of rotation of quaternion, degerees
      */
-    angle_deg() {
+    angle_deg(): number {
         return this.angle() * 180.0 / Math.PI
     }
 
@@ -204,7 +203,7 @@ export default class Quaternion {
      * 
      * @returns {Number} Norm of quaternion
      */
-    norm() {
+    norm(): number {
         let norm = 0
         for (let i = 0; i < 4; i++) {
             norm += this.raw[i] * this.raw[i];
@@ -216,7 +215,7 @@ export default class Quaternion {
      * 
      * @returns {Number} Norm of vector elements of quaternion
      */
-    vnorm() {
+    vnorm(): number {
         let vnorm = 0
         for (let i = 0; i < 3; i++) {
             vnorm += this.raw[i] * this.raw[i];
@@ -227,7 +226,7 @@ export default class Quaternion {
     /**
      * Normalize the quaternion in place
      */
-    normalized() {
+    normalized(): void {
         let norm = this.norm()
         for (let i = 0; i < 4; i++) {
             this.raw[i] /= norm;
@@ -238,7 +237,7 @@ export default class Quaternion {
      * 
      * @returns {Array length=3} Axis of rotation of quaternion
      */
-    axis() {
+    axis(): Vec3 {
         let vnorm = this.vnorm()
         if (vnorm == 0)
             return [1, 0, 0]
@@ -249,11 +248,11 @@ export default class Quaternion {
      * 
      * @returns {String} string representation of quaternion
      */
-    toString() {
+    toString(): string {
         return `Quaternion: (Axis = [${this.axis()}], ` +
             `Angle = ${this.angle().toFixed(3)} rad)`
     }
-    [inspect](depth, opts) {
+    [inspect](depth?: number, opts?: Object): string {
         return this.toString();
     }
 

@@ -6,7 +6,7 @@
  */
 
 // Include the "astrokit"
-import { Quaternion } from '../src/index.js'
+import { Quaternion } from '../dist/src/index.js'
 
 
 import tape from 'tape'

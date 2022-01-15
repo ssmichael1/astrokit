@@ -6,7 +6,7 @@
 
 // Include the "astrokit"
 
-import { ITRFCoord } from '../src/index.js'
+import { ITRFCoord } from '../dist/src/index.js'
 import tape from 'tape'
 
 tape('ITRFCoord validation', (test) => {
@@ -21,8 +21,6 @@ tape('ITRFCoord validation', (test) => {
         'Geodetic longitude self consistency')
     test.assert(Math.abs(itrf.height() == height) < 1.0e-8,
         'Geodetic height self consistency')
-
-
 
     // Make a new coordinate on the ellipsoid and check East-North-Up conversion
     let itrf2 = ITRFCoord.fromGeodeticDeg(latitude_deg, longitude_deg, 0)

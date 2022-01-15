@@ -15,6 +15,26 @@ import { sgp4init, sgp4, getgravconst } from './sgp4.js'
 
 export default class TLE {
 
+    raw: Array<string>
+    name: string
+    satid: string
+    launch_year: number
+    epoch: Date
+    inclination: number
+    mean_motion: number
+    mean_motion_dot: number
+    mean_motion_dot_dot: number
+    launch_number: number
+    launch_piece: string
+    raan: number
+    bstar: number
+    elsetnum: number
+    eccen: number
+    arg_of_perigee: number
+    mean_anomaly: number
+    revnum: number
+    satrec: any
+
     /**
      * 
      * Construct TLE from lines. This accepts as input the traditional
@@ -26,14 +46,14 @@ export default class TLE {
      * @param {*} tline2 If lines passed in 1 at a time, this is the 2nd line
      * @param {*} tline3 If lines passed in 1 at a time, this 3rd line
      */
-    constructor(lines, tline2, tline3) {
+    constructor(lines: string | Array<string>, tline2?: string, tline3?: string) {
         // Figure out the input format
-        if (Array.isArray(lines) == false) {
-            if (typeof line3 === 'undefined') {
-                lines = [lines, tline2]
+        if (typeof lines === "string") {
+            if (typeof tline3 === 'undefined') {
+                lines = [lines, tline2 ?? '']
             }
             else {
-                lines = [lines, tline2, tline3]
+                lines = [lines, tline2 ?? '', tline3]
             }
         }
         this.raw = lines
@@ -61,7 +81,7 @@ export default class TLE {
         }
 
         // Parse the TLE
-        this.satid = Number(line1.substr(2, 5))
+        this.satid = line1.substr(2, 5)
         this.launch_year = Number(line1.substr(9, 2))
         if (this.launch_year > 50)
             this.launch_year += 1900
@@ -94,7 +114,7 @@ export default class TLE {
         this.mean_motion = Number(line2.substr(52, 11))
         this.revnum = Number(line2.substr(63, 5))
 
-
+        this.satrec = undefined
     }
 
     /**
@@ -107,7 +127,7 @@ export default class TLE {
      * @returns {dict} Dictionary with 'r' member indicating position in meters in TEME frame and 'v' member indicating velocity in meters / second in TEME frame
      * 
      */
-    sgp4(thedate, whichconst) {
+    sgp4(thedate: Date, whichconst?: string) {
 
         // Use wgs-84 Earth parameters by default
         // (other option is 'wgs72')
@@ -136,7 +156,7 @@ export default class TLE {
             this.satrec.ecco = this.eccen
             this.satrec.alta = this.satrec.a * (1.0 - this.satrec.ecco) - 1.0
             this.satrec.altp = this.satrec.a * (1.0 + this.satrec.ecco) - 1.0
-            this.satrec.jdsatepoch = this.epoch.jd(Date.timescale.UTC)
+            this.satrec.jdsatepoch = this.epoch.jd('UTC')
             this.satrec.init = 'y'
             this.satrec.t = 0.0
 
@@ -150,7 +170,7 @@ export default class TLE {
         }
 
         // Time since TLE epoch, in minutes
-        let tsince = (thedate.jd(Date.timescale.UTC) - this.satrec.jdsatepoch) * 1440.0
+        let tsince = (thedate.jd('UTC') - this.satrec.jdsatepoch) * 1440.0
 
         // Call low-level SGP-4 funciton
         let results = sgp4(this.satrec, tsince)
