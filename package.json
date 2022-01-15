@@ -24,15 +24,15 @@
   "license": "ISC",
   "homepage": "https://github.com/StevenSamirMichael/astrokit",
   "type": "module",
-  "main": "src/index.js",
-  "module": "src/index.js",
+  "main": "dist/src/index.js",
+  "module": "dist/src/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/StevenSamirMichael/astrokit.git"
   },
   "exports": {
     "umd": "./dist/astrokit.min.js",
-    "default": "./src/index.js"
+    "default": "./dist/src/index.js"
   },
   "scripts": {
     "test": "tape 'test/**/*-test.js' && eslint src",
