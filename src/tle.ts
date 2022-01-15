@@ -127,7 +127,7 @@ export default class TLE {
      * @returns {dict} Dictionary with 'r' member indicating position in meters in TEME frame and 'v' member indicating velocity in meters / second in TEME frame
      * 
      */
-    sgp4(thedate: Date, whichconst: string) {
+    sgp4(thedate: Date, whichconst?: string) {
 
         // Use wgs-84 Earth parameters by default
         // (other option is 'wgs72')

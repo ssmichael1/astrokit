@@ -1,12 +1,13 @@
-import { sind, cosd, tand } from './util.js'
-import { default as ITRFCoord } from './itrfcoord.js'
-import { jd2Date } from './date_extensions.js'
-import { univ } from './lpephemeris.js'
+import { sind, cosd, tand } from './astroutil'
+import { jd2Date } from './date_extensions'
+import { univ } from './lpephemeris'
+import { Vec3 } from './quaternion'
+import { default as ITRFCoord } from './itrfcoord'
 
 const rad2deg = 180. / Math.PI
 
 // Zero-hour GMST, equation 3-45 in Vallado
-const gmst0h = (T) => {
+const gmst0h = (T: number): number => {
     return (100.4606184 + 36000.77005361 * T + 0.00038793 * T * T - 2.6E-8 * T * T * T) % 360.0
 }
 
@@ -20,9 +21,9 @@ const gmst0h = (T) => {
  * @returns Sun position in Earth-centered MOD frame, meters
  * 
  */
-function posMOD(thedate) {
+function posMOD(thedate: Date): Vec3 {
     // Approximate UT1 with UTC
-    let T = (thedate.jd(Date.timescale.UTC) - 2451545.0) / 36525.0
+    let T = (thedate.jd('UTC') - 2451545.0) / 36525.0
     const deg2rad = Math.PI / 180.
     //const rad2deg = Math.PI / 180.
 
@@ -43,9 +44,14 @@ function posMOD(thedate) {
         (1.000140612 - 0.016708617 * Math.cos(M) - 0.000139589 * Math.cos(2. * M));
     r = r * univ.AU;
 
-    return [Math.cos(lambda_ecliptic),
-    Math.sin(lambda_ecliptic) * Math.cos(epsilon),
-    Math.sin(lambda_ecliptic) * Math.sin(epsilon)].map(x => x * r)
+    return [Math.cos(lambda_ecliptic) * r,
+    Math.sin(lambda_ecliptic) * Math.cos(epsilon) * r,
+    Math.sin(lambda_ecliptic) * Math.sin(epsilon) * r]
+}
+
+type risesettype = {
+    rise: Date
+    set: Date
 }
 
 /**
@@ -60,30 +66,30 @@ function posMOD(thedate) {
  * 
  * @returns  { rise: Date Object of rise, set: Date object of set }
  */
-const riseSet = (thedate, coord, sigma) => {
+const riseSet = (thedate: Date, coord: ITRFCoord, sigma: number): risesettype => {
     let latitude = coord.latitude_deg()
     let longitude = coord.longitude_deg()
 
     const calcterms = [{
         name: 'sunrise',
         jdoffset: 0.25,
-        lhafunc: (x) => (360 - x)
+        lhafunc: (x: number): number => (360 - x)
     },
     {
         name: 'sunset',
         jdoffset: 0.75,
-        lhafunc: (x) => x
+        lhafunc: (x: number): number => x
     }]
 
     // Sigma is angle between site and sun
     if (sigma == undefined)
         sigma = 90 + 50 / 60
 
-    let jd0h = thedate.jd(Date.timescale.UTC)
+    let jd0h = thedate.jd('UTC')
     jd0h = Math.round(jd0h * 2) / 2
     let riseset = calcterms.map((v) => {
 
-        let jd = thedate.jd(Date.timescale.UTC) + v.jdoffset
+        let jd = thedate.jd('UTC') + v.jdoffset
         jd = jd - longitude / 360
         let T = (jd - 2451545.0) / 36525
 
