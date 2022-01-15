@@ -6,24 +6,22 @@
  * handle conversion between different time scales
  *
 */
+
 type timescale = 'UTC' | 'TT' | 'TAI' | 'GPS';
 
-
-enum ts {
-    UTC,
-    TT,
-    TAI,
-    GPS
+export enum TimeScale {
+    UTC = "UTC",
+    TT = "TT",
+    TAI = "TAI",
+    GPS = "GPS"
 }
-
 
 declare global {
     interface Date {
-        timescale: ts;
         mjd: (ts?: timescale) => number;
         jd: (ts?: timescale) => number;
-
     }
+
 }
 
 
@@ -33,7 +31,7 @@ Date.prototype.jd = function (ts?: timescale) {
     if (ts == undefined) {
         ts = 'UTC'
     }
-    else if (ts == 'TAI') {
+    else if (ts == TimeScale.TAI) {
         timeshift_seconds = utc2tai(this)
     }
     else if (ts == 'TT') {
@@ -191,7 +189,7 @@ let utc2tai = (t: Date): number => {
         return 0
 }
 
-export const jd2Date = function (jdUTC: number) {
+export const jd2Date = function (jdUTC: number): Date {
 
     return new Date((jdUTC - 2440587.5) * 86400 * 1000)
 }
