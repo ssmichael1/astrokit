@@ -1,6 +1,6 @@
 {
   "name": "astrokit",
-  "version": "0.7.0",
+  "version": "0.6.5",
   "description": "Toolkit for solar system ephemerides and satellite propagation via SGP4",
   "keywords": [
     "solar",
@@ -14,7 +14,11 @@
     "solarsystem",
     "moon",
     "planetary ephemerides",
-    "planets"
+    "planets",
+    "sunrise",
+    "sunset",
+    "moonrise",
+    "moonset"
   ],
   "author": {
     "name": "Steven Michael",
