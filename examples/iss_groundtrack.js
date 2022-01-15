@@ -11,7 +11,7 @@
  */
 
 // Import the astrokit
-import * as ak from '../src/index.js'
+import * as ak from '../dist/src/index.js'
 
 // A recent (9/24/2021) TLE for the international space station
 // as downloaded from www.space-track.org
@@ -61,6 +61,7 @@ let iss_groundtrack = times.map((t) => {
         longitude_deg: itrf.longitude_deg(),
         height_meters: itrf.height()
     }
+
 })
 // print output to screen
 console.log(iss_groundtrack)

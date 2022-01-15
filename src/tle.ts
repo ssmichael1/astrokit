@@ -10,7 +10,7 @@
  * 
  */
 
-import { sgp4init, sgp4, getgravconst } from './sgp4'
+import { sgp4init, sgp4, getgravconst } from './sgp4.js'
 
 
 export default class TLE {
@@ -114,7 +114,7 @@ export default class TLE {
         this.mean_motion = Number(line2.substr(52, 11))
         this.revnum = Number(line2.substr(63, 5))
 
-        this.satrec = {}
+        this.satrec = undefined
     }
 
     /**

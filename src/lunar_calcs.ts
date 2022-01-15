@@ -1,9 +1,9 @@
-import { sind, cosd } from './astroutil'
-import { gmst } from './coordconversion'
-import { jd2Date } from './date_extensions'
-import { univ } from './lpephemeris'
-import { Vec3 } from './quaternion'
-import { default as ITRFCoord } from './itrfcoord'
+import { sind, cosd } from './astroutil.js'
+import { gmst } from './coordconversion.js'
+import { jd2Date } from './date_extensions.js'
+import { univ } from './lpephemeris.js'
+import { Vec3 } from './quaternion.js'
+import { default as ITRFCoord } from './itrfcoord.js'
 
 const deg2rad = Math.PI / 180.
 const rad2deg = 180. / Math.PI

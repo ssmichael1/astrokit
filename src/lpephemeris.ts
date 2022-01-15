@@ -10,10 +10,10 @@
  * 
  */
 
-import { sind, cosd, eadd } from './astroutil'
-import './date_extensions'
-import { Vec3 } from './quaternion'
-import { moon } from './lunar_calcs'
+import { sind, cosd, eadd } from './astroutil.js'
+import './date_extensions.js'
+import { Vec3 } from './quaternion.js'
+import { moon } from './lunar_calcs.js'
 /**
  * Bodies for which position can be computed
  */

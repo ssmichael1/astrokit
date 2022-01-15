@@ -1,21 +1,21 @@
 import TLE from './tle'
 
-export * from './astroutil'
+export * from './astroutil.js'
 
-export * from './solar_calcs'
+export * from './solar_calcs.js'
 
-export * from './lunar_calcs'
+export * from './lunar_calcs.js'
 
-export { default as Quaternion } from './quaternion'
+export { default as Quaternion } from './quaternion.js'
 
-export * from './date_extensions'
+export * from './date_extensions.js'
 
-export { default as ITRFCoord } from './itrfcoord'
+export * from './lpephemeris.js'
 
-export { qTEME2ITRF, qGCRS2ITRF, gmst, gast } from './coordconversion'
+export { default as ITRFCoord } from './itrfcoord.js'
 
-export { default as TLE } from './tle'
+export { qTEME2ITRF, qGCRS2ITRF, gmst, gast } from './coordconversion.js'
 
-export * from './astroutil'
+export { default as TLE } from './tle.js'
 
 export const sgp4 = (tle: TLE, thedate: Date, gravmodel?: string) => tle.sgp4(thedate, gravmodel)

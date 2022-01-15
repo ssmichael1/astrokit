@@ -12,7 +12,7 @@
  *
  */
 
-import { default as Quaternion, Vec3 } from './quaternion';
+import { default as Quaternion, Vec3 } from './quaternion.js';
 import './date_extensions.js'
 
 const deg2rad = Math.PI / 180.0

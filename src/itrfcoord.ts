@@ -26,15 +26,21 @@ const deg2rad = Math.PI / 180.0
 
 var inspect = Symbol.for('nodejs.util.inspect.custom');
 
-import { default as Quaternion, Vec3 } from './quaternion'
-import 'astroutil'
+import { default as Quaternion, Vec3 } from './quaternion.js'
+import './astroutil.js'
 
 export default class ITRFCoord {
 
     raw: Vec3;
 
-    constructor(x?: number, y?: number, z?: number) {
-        this.raw = [x ?? 0, y ?? 0, z ?? 0]
+    constructor(x?: number | Vec3, y?: number, z?: number) {
+        this.raw = [0, 0, 0]
+        if (typeof x === 'object') {
+            this.raw = x
+        }
+        if (typeof x === 'number') {
+            this.raw = [x ?? 0, y ?? 0, z ?? 0]
+        }
     }
 
 
