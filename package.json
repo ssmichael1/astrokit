@@ -37,7 +37,7 @@
   "scripts": {
     "test": "tape 'test/**/*-test.js' && eslint src",
     "build:es6": "rm -rf dist && mkdir -p dist/src && tsc",
-    "build:umd": "npm run build:es6 && rollup--config",
+    "build:umd": "npm run build:es6 && rollup --config",
     "build:min": "npm run build:umd && uglifyjs  dist/astrokit.js -c -m -o dist/astrokit.min.js",
     "build": "npm run build:min",
     "prepare": "npm run build"
