@@ -11,7 +11,7 @@
  */
 
 // Import the astrokit
-import * as ak from '../src/index.js'
+import * as ak from '../dist/src/index.js'
 
 
 // Compute access every second over the course of a day

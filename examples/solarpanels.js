@@ -7,7 +7,7 @@
  *
  */
 
-import * as ak from '../src/index.js'
+import * as ak from '../dist/src/index.js'
 
 /* Description of solar panels at my house */
 let panels = {

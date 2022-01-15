@@ -4,7 +4,7 @@
  * Compute moon rise and set times, phase, etc...
  */
 
-import * as ak from '../src/index.js'
+import * as ak from '../dist/src/index.js'
 
 // Get today's date
 let now = new Date()
