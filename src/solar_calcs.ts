@@ -56,17 +56,18 @@ type risesettype = {
 
 /**
  * 
- * @param {Date} thedate Date for which to compute sunrise & sunset
- * @param {ITRFCoord} coord Ground location for which to compute 
- * @param {Number} sigma Angle between noon and rise/set, in degrees:
+ * @param thedate Date for which to compute sunrise & sunset
+ * @param coord Ground location for which to compute 
+ * @param sigma Angle between noon and rise/set, in degrees:
  %                       rise/set: 90 deg, 50 arcmin
  *                       Civil twilight: 96 deg
  *                       Nautical twilight: 102 deg
  *                       Astronomical twilight: 108 deg
+ *                       Default is for rise/set (90 + 50/60)
  * 
  * @returns  { rise: Date Object of rise, set: Date object of set }
  */
-const riseSet = (thedate: Date, coord: ITRFCoord, sigma: number): risesettype => {
+const riseSet = (thedate: Date, coord: ITRFCoord, sigma?: number): risesettype => {
     let latitude = coord.latitude_deg()
     let longitude = coord.longitude_deg()
 
@@ -81,9 +82,7 @@ const riseSet = (thedate: Date, coord: ITRFCoord, sigma: number): risesettype =>
         lhafunc: (x: number): number => x
     }]
 
-    // Sigma is angle between site and sun
-    if (sigma == undefined)
-        sigma = 90 + 50 / 60
+
 
     let jd0h = thedate.jd('UTC')
     jd0h = Math.round(jd0h * 2) / 2
@@ -106,7 +105,7 @@ const riseSet = (thedate: Date, coord: ITRFCoord, sigma: number): risesettype =>
         let alpha_sun = Math.atan(tanalpha_sun) * rad2deg
 
 
-        let coslha = (cosd(sigma) - sind(deltasun) * sind(latitude)) /
+        let coslha = (cosd(sigma || (90 + 50 / 60)) - sind(deltasun) * sind(latitude)) /
             (cosd(deltasun) * cosd(latitude))
         let LHA = Math.acos(coslha) * rad2deg
         LHA = v.lhafunc(LHA)
