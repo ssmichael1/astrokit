@@ -6,9 +6,17 @@ import { Vec3 } from './quaternion.js'
 import { default as ITRFCoord } from './itrfcoord.js'
 
 
+export { Vec3 }
+
 export interface RiseSetType {
     rise: Date
     set: Date
+}
+
+export interface PhaseNameType {
+    phase: number,
+    name: string,
+    fracillum: number
 }
 
 const deg2rad = Math.PI / 180.
@@ -58,6 +66,7 @@ export const posGCRS = (thedate: Date): Vec3 => {
 
 }
 
+
 /**
  * 
  * Compute phase of moon from Vallado
@@ -67,7 +76,6 @@ export const posGCRS = (thedate: Date): Vec3 => {
  */
 export const phase = (thedate: Date): number => {
     let T = (thedate.jd('UTC') - 2451545.0) / 36525.0
-
 
     let lambda_ecliptic_moon = deg2rad *
         (218.32 + 481267.8813 * T +
@@ -106,6 +114,46 @@ export const phase = (thedate: Date): number => {
  */
 export const fractionIlluminated = (thedate: Date): number => {
     return 0.5 * (1 - Math.cos(phase(thedate)))
+}
+
+/**
+ * 
+ * @param thedate Date for which to get phase name
+ * @returns Struct with numerical phase, string describing phase, and
+ *          fraction of sun illuminated
+ */
+export const phaseName = (thedate: Date): PhaseNameType => {
+    // Phase for date chosen
+    let phasenow = phase(thedate) * rad2deg
+
+    // Phase for previous day
+    let phaseprev = phase(new Date(thedate.getTime() - 86400 * 1000)) * rad2deg
+
+    // Fraction illuminated
+    let fracillum = 0.5 * (1 - cosd(phasenow))
+    let fracillumprev = 0.5 * (1 - cosd(phaseprev))
+
+    let phasename = ''
+    if ((phasenow >= 180) && (phaseprev < 180)) {
+        phasename = 'Full Moon'
+    }
+    else if ((phasenow < 80) && (phaseprev > 300)) {
+        phasename = 'New Moon'
+    }
+    else {
+        let name1 = 'Waning'
+        let name2 = 'Gibbous'
+        if (fracillum < 0.5)
+            name2 = 'Crecent'
+        if (fracillum > fracillumprev)
+            name1 = 'Waxing'
+        phasename = name1 + ' ' + name2
+    }
+    return {
+        phase: phasenow,
+        name: phasename,
+        fracillum: fracillum
+    }
 }
 
 
@@ -206,8 +254,6 @@ export const riseSet = (thedate: Date, coord: ITRFCoord): RiseSetType => {
         }
         return jd2Date(JDtemp)
     })
-
-
     return {
         rise: hrise,
         set: hset
