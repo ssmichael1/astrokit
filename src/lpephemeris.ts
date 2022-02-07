@@ -13,7 +13,7 @@
 import { sind, cosd, eadd } from './astroutil.js'
 import './date_extensions.js'
 import { Vec3 } from './quaternion.js'
-import { moon } from './lunar_calcs.js'
+import * as moon from './lunar_calcs.js'
 import { univ } from './univ.js'
 
 /**

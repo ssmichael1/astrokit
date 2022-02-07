@@ -5,6 +5,12 @@ import { univ } from './univ.js'
 import { Vec3 } from './quaternion.js'
 import { default as ITRFCoord } from './itrfcoord.js'
 
+
+export interface RiseSetType {
+    rise: Date
+    set: Date
+}
+
 const deg2rad = Math.PI / 180.
 const rad2deg = 180. / Math.PI
 
@@ -16,7 +22,7 @@ const rad2deg = 180. / Math.PI
  * @param thedate Date for which to compute position
  * @returns 3-vector representing moon position in GCRS frame, meters
  */
-const posGCRS = (thedate: Date): Vec3 => {
+export const posGCRS = (thedate: Date): Vec3 => {
     let T = (thedate.jd('UTC') - 2451545.0) / 36525.0
     let lambda_ecliptic = 218.32 + 481267.8813 * T +
         6.29 * sind(134.9 + 477198.85 * T) -
@@ -59,7 +65,7 @@ const posGCRS = (thedate: Date): Vec3 => {
  * @param thedate Date for which to compute position
  * @returns Moon phase in radians, in range [-pi pi]
  */
-const phase = (thedate: Date): number => {
+export const phase = (thedate: Date): number => {
     let T = (thedate.jd('UTC') - 2451545.0) / 36525.0
 
 
@@ -98,14 +104,10 @@ const phase = (thedate: Date): number => {
  * @returns Fraction of moon illuminated by sun as seen from Earth,
  *          in range [0,1]
  */
-const fractionIlluminated = (thedate: Date): number => {
+export const fractionIlluminated = (thedate: Date): number => {
     return 0.5 * (1 - Math.cos(phase(thedate)))
 }
 
-type risesettype = {
-    rise: Date
-    set: Date
-}
 
 /**
  * 
@@ -116,7 +118,7 @@ type risesettype = {
  * @param coord Coordinate at which to communicate rise & set
  * @returns JSON with moon rise and set times as javascript Dates
  */
-const riseSet = (thedate: Date, coord: ITRFCoord): risesettype => {
+export const riseSet = (thedate: Date, coord: ITRFCoord): RiseSetType => {
 
     let observer_longitude = coord.longitude()
     let observer_latitude = coord.geocentric_latitude()
@@ -210,11 +212,4 @@ const riseSet = (thedate: Date, coord: ITRFCoord): risesettype => {
         rise: hrise,
         set: hset
     }
-}
-
-export const moon = {
-    posGCRS: posGCRS,
-    phase: phase,
-    fractionIlluminated: fractionIlluminated,
-    riseSet: riseSet
 }

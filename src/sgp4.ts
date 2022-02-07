@@ -20,7 +20,7 @@
  * 
  */
 
-import { Vec3 } from "./quaternion"
+import { Vec3 } from "./quaternion.js"
 
 
 /*     ----------------------------------------------------------------
@@ -1570,12 +1570,12 @@ function initl(xke: number, j2: number,
 		double r[3], double v[3]	
 	)
 */
-type rv = {
+export type SatRV = {
 	r: Vec3,
 	v: Vec3
 }
 
-export const sgp4 = (satrec: any, tsince: number): rv | undefined => {
+export const sgp4 = (satrec: any, tsince: number): SatRV | undefined => {
 
 	let r = [0, 0, 0]
 	let v = [0, 0, 0]

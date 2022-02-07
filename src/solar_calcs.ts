@@ -12,6 +12,11 @@ const gmst0h = (T: number): number => {
 }
 
 
+export interface RiseSetType {
+    rise: Date
+    set: Date
+}
+
 /**
  * 
  * Sun position in the Mean-of-Date frame
@@ -21,7 +26,7 @@ const gmst0h = (T: number): number => {
  * @returns Sun position in Earth-centered MOD frame, meters
  * 
  */
-function posMOD(thedate: Date): Vec3 {
+export function posMOD(thedate: Date): Vec3 {
     // Approximate UT1 with UTC
     let T = (thedate.jd('UTC') - 2451545.0) / 36525.0
     const deg2rad = Math.PI / 180.
@@ -49,10 +54,6 @@ function posMOD(thedate: Date): Vec3 {
     Math.sin(lambda_ecliptic) * Math.sin(epsilon) * r]
 }
 
-type risesettype = {
-    rise: Date
-    set: Date
-}
 
 /**
  * 
@@ -67,7 +68,7 @@ type risesettype = {
  * 
  * @returns  { rise: Date Object of rise, set: Date object of set }
  */
-const riseSet = (thedate: Date, coord: ITRFCoord, sigma?: number): risesettype => {
+export const riseSet = (thedate: Date, coord: ITRFCoord, sigma?: number): RiseSetType => {
     let latitude = coord.latitude_deg()
     let longitude = coord.longitude_deg()
 
@@ -115,10 +116,4 @@ const riseSet = (thedate: Date, coord: ITRFCoord, sigma?: number): risesettype =
         return jd2Date(ret / 360 + jd0h - longitude / 360)
     })
     return { rise: riseset[0], set: riseset[1] }
-}
-
-export const sun =
-{
-    riseSet: riseSet,
-    posMOD: posMOD
 }
