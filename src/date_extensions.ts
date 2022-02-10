@@ -7,13 +7,16 @@
  *
 */
 
-type timescale = 'UTC' | 'TT' | 'TAI' | 'GPS';
+import * as eop from './earth_orientation_parameters.js'
+
+type timescale = 'UTC' | 'TT' | 'TAI' | 'GPS' | "UT1";
 
 export enum TimeScale {
     UTC = "UTC",
     TT = "TT",
     TAI = "TAI",
-    GPS = "GPS"
+    GPS = "GPS",
+    UT1 = "UT1"
 }
 
 declare global {
@@ -33,6 +36,9 @@ Date.prototype.jd = function (ts?: timescale) {
     }
     else if (ts == TimeScale.TAI) {
         timeshift_seconds = utc2tai(this)
+    }
+    else if (ts == TimeScale.UT1) {
+        timeshift_seconds = eop.get(this)?.dut1 || 0
     }
     else if (ts == 'TT') {
         timeshift_seconds = utc2tai(this) + 32.184
