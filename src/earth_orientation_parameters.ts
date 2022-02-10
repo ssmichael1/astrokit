@@ -1,7 +1,7 @@
 export interface RecordType {
     mjd: number,
-    pmx: number,
-    pmy: number,
+    px: number,
+    py: number,
     lod: number,
     dut1: number
 }
@@ -13,7 +13,7 @@ let eop: Array<RecordType> | undefined = undefined
 
 /**
  * 
- * @returns Raw Earth orientation parameters arry
+ * @returns Raw Earth orientation parameters array
  * 
  */
 export const raw = (): Array<RecordType> | undefined => {
@@ -54,8 +54,8 @@ export const loadFromString = (raw: string): boolean => {
     eop = raw.split(/\r\n|\r|\n/).map((line) => {
         return {
             mjd: Number(line.slice(7, 15)),
-            pmx: Number(line.slice(18, 27)),
-            pmy: Number(line.slice(37, 46)),
+            px: Number(line.slice(18, 27)),
+            py: Number(line.slice(37, 46)),
             lod: Number(line.slice(79, 86)),
             dut1: Number(line.slice(58, 68))
         }
