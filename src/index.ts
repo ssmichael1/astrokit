@@ -3,6 +3,8 @@ export * from './astroutil.js'
 
 export * as sun from './solar_calcs.js'
 
+export * as eop from './earth_orientation_parameters.js'
+
 export * as moon from './lunar_calcs.js'
 
 export * from './univ.js'
