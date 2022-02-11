@@ -1,7 +1,7 @@
 export interface RecordType {
     mjd: number,
-    px: number,
-    py: number,
+    xp: number,
+    yp: number,
     lod: number,
     dut1: number
 }
@@ -59,8 +59,8 @@ export const loadFromString = (raw: string): boolean => {
         .map((line) => {
             return {
                 mjd: Number(line.slice(7, 15)),
-                px: Number(line.slice(18, 27)),
-                py: Number(line.slice(37, 46)),
+                xp: Number(line.slice(18, 27)),
+                yp: Number(line.slice(37, 46)),
                 lod: Number(line.slice(79, 86)),
                 dut1: Number(line.slice(58, 68))
             }
