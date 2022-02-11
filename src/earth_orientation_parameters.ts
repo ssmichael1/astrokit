@@ -51,15 +51,23 @@ export const fileURL =
  * @returns true on success, false on failure
  */
 export const loadFromString = (raw: string): boolean => {
-    eop = raw.split(/\r\n|\r|\n/).map((line) => {
-        return {
-            mjd: Number(line.slice(7, 15)),
-            px: Number(line.slice(18, 27)),
-            py: Number(line.slice(37, 46)),
-            lod: Number(line.slice(79, 86)),
-            dut1: Number(line.slice(58, 68))
-        }
-    })
+    eop = raw
+        .split(/\r\n|\r|\n/)
+        .filter((l) => {
+            return (l.length > 70) ? true : false
+        })
+        .map((line) => {
+            return {
+                mjd: Number(line.slice(7, 15)),
+                px: Number(line.slice(18, 27)),
+                py: Number(line.slice(37, 46)),
+                lod: Number(line.slice(79, 86)),
+                dut1: Number(line.slice(58, 68))
+            }
+        })
+        .filter((v) => {
+            return (v.mjd >= 41684) ? true : false
+        })
     return true
 }
 
