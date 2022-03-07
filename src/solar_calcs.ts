@@ -19,6 +19,52 @@ export interface RiseSetType {
 
 /**
  * 
+ * Fraction of year for given date
+ * 
+ * @param thedate Date for which fraction of year is computed
+ * @returns Fraction of year
+ */
+function fractionOfYear(thedate: Date): number {
+    let startOfYear = new Date(thedate.getFullYear(), 0, 1)
+    return (thedate.mjd() - startOfYear.mjd()) / 365.25
+}
+
+/**
+ * 
+ * Equation of Time
+ * https://gml.noaa.gov/grad/solcalc/solareqns.PDF
+ * 
+ * @param thedate 
+ * @returns Equation of time (minutes)
+ */
+function eqtime(thedate: Date): number {
+    let g = fractionOfYear(thedate) * Math.PI * 2.0
+    return 229.18 * (
+        0.000075 + 0.001868 * Math.cos(g)
+        - 0.032077 * Math.sin(g)
+        - 0.014615 * Math.cos(2.0 * g)
+        - 0.040849 * Math.sin(2.0 * g)
+    )
+}
+
+/**
+ * 
+ * Compute time of solar noon
+ * https://gml.noaa.gov/grad/solcalc/solareqns.PDF
+ * 
+ * @param thedate Date for which to compute local noon time
+ * @param longitude Longitude for which to compute local noon, in degrees
+ */
+export function solarNoon(thedate: Date, longitude: number): Date {
+
+    let snoon = 720 - 4 * longitude - eqtime(thedate)
+    let startOfDay = new Date(thedate)
+    startOfDay.setHours(0, 0, 0)
+    return new Date(startOfDay.getTime() + snoon * 60 * 1000)
+}
+
+/**
+ * 
  * Sun position in the Mean-of-Date frame
  * Vallado algorithm 29, page 279
  * 
