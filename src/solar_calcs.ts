@@ -58,8 +58,7 @@ function eqtime(thedate: Date): number {
 export function solarNoon(thedate: Date, longitude: number): Date {
 
     let snoon = 720 - 4 * longitude - eqtime(thedate)
-    let startOfDay = new Date(thedate)
-    startOfDay.setHours(0, 0, 0)
+    let startOfDay = new Date(Date.UTC(thedate.getFullYear(), thedate.getMonth(), thedate.getDate()))
     return new Date(startOfDay.getTime() + snoon * 60 * 1000)
 }
 
