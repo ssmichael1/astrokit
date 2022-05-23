@@ -24,3 +24,12 @@ tape('Sun position, Mean-Of-Date (MOD) coordinate system', (test) => {
     test.end()
 
 })
+
+tape('Solar Noon', (test) => {
+    let date = new Date(Date.UTC(2022, 2, 9, 12, 0, 0))
+    let longitude = -71.1565
+    let noon = ak.sun.solarNoon(date, longitude)
+    test.assert((noon.getHours() == 11) && (noon.getMinutes() == 55),
+        '11:55AM is solar noon on March 9 2022 in Arlington, MA USA')
+    test.end()
+})
